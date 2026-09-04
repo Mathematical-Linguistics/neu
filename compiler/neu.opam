@@ -3,8 +3,8 @@ synopsis: "The Information-Theoretic Polyglot Language for Living Systems & Bio-
 maintainer: ["Erick Oduniyi <community@intelligent-interfaces.org>"]
 authors: ["Erick Oduniyi"]
 license: "MIT"
-homepage: "https://github.com/Mathematical-Linguistics-Group-mL-G/neu"
-bug-reports: "https://github.com/Mathematical-Linguistics-Group-mL-G/neu/issues"
+homepage: "https://github.com/Mathematical-Linguistics/neu"
+bug-reports: "https://github.com/Mathematical-Linguistics/neu/issues"
 depends: [
   "ocaml" {>= "5.0"}
   "dune" {>= "3.14"}
