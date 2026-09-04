@@ -1,6 +1,6 @@
 (** =========================================================================
     main.ml
-    Neu CLI Compiler & Runtime Driver (mL-G)
+    Neu CLI Compiler & Runtime Driver (mlG)
     Commands:
       neu run <file.neu>
       neu check <file.neu>
@@ -13,13 +13,13 @@ open Ast
 
 let print_banner () =
   print_endline "=================================================================";
-  print_endline "  Neu: The Information-Theoretic Polyglot Language (mL-G)       ";
-  print_endline "  Synthesis · Analysis · Isometry · Bio-P4 Programmable Silicon ";
+  print_endline "  Neu: Engine Expression Language (mlG)                         ";
+  print_endline "  Morphisms (->) · Split · Scatter · Decompose · Cover · Shift   ";
   print_endline "================================================================="
 
 let run_demo () =
   print_banner ();
-  print_endline "\n[1] R-Style Vectorized Arithmetic & Pipe Pipeline:";
+  print_endline "\n[1] Structural Engine Flow (->) & Vectorized Arithmetic:";
   let code_vec = "let temps = [72.0, 68.0, 75.0, 69.0, 71.0] in (temps - 32.0) * 0.555" in
   Printf.printf "  Source: %s\n" code_vec;
   let lexbuf = Lexing.from_string code_vec in
@@ -27,7 +27,20 @@ let run_demo () =
   let result = Eval.eval [] expr in
   Printf.printf "  Result: %s\n" (Eval.string_of_val result);
 
-  print_endline "\n[2] aie Information-Theoretic Entropy Type Checks:";
+  print_endline "\n[2] Structural Topological Verbs (shift, cover, split, cast):";
+  let demo_lines = [
+    ("Shift (temporal/spatial delay):", "[1, 2, 3, 4] -> shift(1)");
+    ("Cover (topological sliding window):", "[10, 20, 30, 40] -> cover(2, 1)");
+    ("Cast (functorial projection):", "[100, 200] -> cast(BioTelemetry)");
+  ] in
+  List.iter (fun (desc, src) ->
+    let lbuf = Lexing.from_string src in
+    let ex = Parser.single_expr Lexer.read lbuf in
+    let res = Eval.eval [] ex in
+    Printf.printf "  %-38s %s -> %s\n" desc src (Eval.string_of_val res);
+  ) demo_lines;
+
+  print_endline "\n[3] Engine Trajectory Validation (synthesis, analysis, isometry):";
   let cert_synth = Typecheck.check_entropy_trajectory "generative_expander" Synthesis 12.0 48.0 in
   let cert_analysis = Typecheck.check_entropy_trajectory "on_body_triage" Analysis 128.0 4.0 in
   let cert_iso = Typecheck.check_entropy_trajectory "fourier_transform" Transformation 64.0 64.0 in
@@ -35,7 +48,7 @@ let run_demo () =
   print_endline ("  " ^ Typecheck.string_of_cert cert_analysis);
   print_endline ("  " ^ Typecheck.string_of_cert cert_iso);
 
-  print_endline "\n[3] Bio-P4 Clinical Safety Contract Synthesis:";
+  print_endline "\n[4] Bio-P4 Clinical Safety Contract Synthesis:";
   let default_rules = [
     { priority = 1; glucose_range = (0, 70); delta_range = (-50, 50); action = SuppressDosage; invariant_id = "INV_HYPO_BARRIER" };
     { priority = 2; glucose_range = (71, 95); delta_range = (-50, -2); action = SetDosage 5; invariant_id = "INV_RAMP_SUPPRESS" };

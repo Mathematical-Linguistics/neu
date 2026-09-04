@@ -44,18 +44,38 @@ fn expand_spectrum(seed): synthesis = seed * 2;
 
 ---
 
-## Vectorized Syntax & Pipelines
+## Structural Flow & Topological Operators
 
-Neu treats vectors and pipes as language primitives, combining R's exploratory workflow with OCaml's type safety:
+Instead of traditional single-tube pipelines, Neu models computation as continuous morphisms using the transformation arrow (`->`) and first-class topological verbs:
+
+- **`split`**: Branching a single flow into concurrent engine paths.
+- **`shift`**: Applying temporal, spatial, or phase displacements.
+- **`cover`**: Partitioning streams into overlapping open windows / neighborhoods.
+- **`cast`**: Functorial re-interpretation into another manifold or protocol frame.
+- **`scatter`**: Distributing arrays across spatial channels or hardware lanes.
+- **`decompose`**: Unpacking compound signals into constituent bases.
 
 ```neu
+let wave = [10, 20, 30, 40, 50];
+
+// Shift: temporal or spatial displacement
+let delayed = wave -> shift(2);              // [40, 50, 10, 20, 30]
+
+// Cover: overlapping topological windowing (window: 3, step: 1)
+let windows = wave -> cover(3, 1);           // [[10, 20, 30], [20, 30, 40], [30, 40, 50]]
+
+// Split: parallel concurrent engine pathways
+fn high_pass(x) = x * 2;
+fn low_pass(x) = x / 2;
+let bands = 100 -> split { high_pass, low_pass }; // [200, 50]
+
+// Cast: functorial reinterpretation
+let packet = wave -> cast(BioTelemetry);     // BioTelemetry([10, 20, 30, 40, 50])
+
 // Vectorized arithmetic distributes automatically over arrays
 let raw_vitals = [98.6, 99.1, 101.4, 98.4, 102.2];
-
 fn to_celsius(f) = (f - 32.0) * 0.555;
-
-// Pipe values directly into functions
-let celsius = raw_vitals |> to_celsius;
+let celsius = raw_vitals -> to_celsius;
 ```
 
 ---

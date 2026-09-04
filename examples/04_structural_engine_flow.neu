@@ -1,0 +1,22 @@
+// 04_structural_engine_flow.neu
+// Structural engine operations: ->, split, scatter, decompose, cover, shift, cast
+
+let wave = [10, 20, 30, 40, 50];
+
+// Shift: temporal or spatial displacement
+let delayed = wave -> shift(2);
+delayed;
+
+// Cover: overlapping topological windowing (window: 3, step: 1)
+let windows = wave -> cover(3, 1);
+windows;
+
+// Split: parallel concurrent engine pathways
+fn high_pass(x) = x * 2;
+fn low_pass(x) = x / 2;
+let bands = 100 -> split { high_pass, low_pass };
+bands;
+
+// Cast: functorial reinterpretation
+let packet = wave -> cast(BioTelemetry);
+packet;

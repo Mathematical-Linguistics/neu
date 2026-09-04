@@ -32,6 +32,14 @@ rule read = parse
   | "analysis"        { ANALYSIS }
   | "transformation"  { TRANSFORMATION }
 
+  (* Structural Engine Verbs *)
+  | "split"           { SPLIT }
+  | "scatter"         { SCATTER }
+  | "decompose"       { DECOMPOSE }
+  | "cover"           { COVER }
+  | "shift"           { SHIFT }
+  | "cast"            { CAST }
+
   (* Operators *)
   | "|>"            { PIPE }
   | "->"            { ARROW }

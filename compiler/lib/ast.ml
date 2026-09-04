@@ -1,7 +1,8 @@
 (** =========================================================================
     ast.ml
     Abstract Syntax Tree for Neu:
-    The Information-Theoretic Polyglot Language for Living Systems & Bio-P4
+    Engine Expression Language with Structural Flow (->, split, scatter,
+    decompose, cover, shift, cast)
     ========================================================================= *)
 
 type engine_type =
@@ -43,6 +44,13 @@ type expr =
   | Let of string * expr * expr
   | BinOp of string * expr * expr
   | Pipe of expr * expr
+  | Flow of expr * expr                    (** Morphism flow: e1 -> e2 *)
+  | Split of expr list                     (** Concurrent split: split { e1, e2, ... } *)
+  | Scatter of expr                        (** Scatter distribution: scatter(lanes) *)
+  | Decompose of expr                      (** Constituent decomposition: decompose(basis) *)
+  | Cover of expr * expr                   (** Topological cover: cover(window, step) *)
+  | Shift of expr                          (** Displace / offset: shift(delta) *)
+  | Cast of string                         (** Functorial cast: cast(Type) *)
   | If of expr * expr * expr
   | Lambda of string list * expr
   | Call of expr * expr list

@@ -1,8 +1,8 @@
 (** =========================================================================
     eval.ml
     Evaluation Engine for Neu:
-    Supports R-style vectorized arithmetic, first-class pipelines (|>),
-    closures, and clinical contract instantiation.
+    Supports R-style vectorized arithmetic, structural transformations (->),
+    and topological verbs (split, scatter, decompose, cover, shift, cast).
     ========================================================================= *)
 
 open Ast
@@ -16,6 +16,7 @@ type value =
   | VRecord of (string * value) list
   | VClosure of string list * expr * env
   | VContract of clinical_contract
+  | VTagged of string * value
 
 and env = (string * value) list
 
@@ -31,6 +32,7 @@ let rec string_of_val = function
       "{" ^ (String.concat ", " (List.map (fun (k, v) -> k ^ ": " ^ string_of_val v) fields)) ^ "}"
   | VClosure (params, _, _) -> "<fn (" ^ (String.concat ", " params) ^ ")>"
   | VContract c -> "<contract " ^ c.contract_name ^ ">"
+  | VTagged (tag, v) -> Printf.sprintf "%s(%s)" tag (string_of_val v)
 
 (** Element-wise vector binary operation helper *)
 let rec apply_binop op v1 v2 =
@@ -84,6 +86,33 @@ let rec apply_binop op v1 v2 =
 
   | _ -> raise (EvalError ("Unsupported operands for operator: " ^ op))
 
+(** Shift helper: rotates/displaces list by offset *)
+let shift_list (offset : int) (items : 'a list) : 'a list =
+  let n = List.length items in
+  if n = 0 then []
+  else
+    let k = ((offset mod n) + n) mod n in
+    let rec split_at i acc lst =
+      if i = 0 then (List.rev acc, lst)
+      else match lst with
+        | [] -> (List.rev acc, [])
+        | x :: xs -> split_at (i - 1) (x :: acc) xs
+    in
+    let (left, right) = split_at (n - k) [] items in
+    right @ left
+
+(** Cover helper: partitions list into overlapping sub-lists of window size w, step s *)
+let cover_list (w : int) (s : int) (items : 'a list) : 'a list list =
+  let arr = Array.of_list items in
+  let n = Array.length arr in
+  let rec loop idx acc =
+    if idx + w > n then List.rev acc
+    else
+      let slice = Array.sub arr idx w in
+      loop (idx + s) (Array.to_list slice :: acc)
+  in
+  if w <= 0 || s <= 0 then [] else loop 0 []
+
 let rec eval (env : env) (e : expr) : value =
   match e with
   | Int i -> VInt i
@@ -104,15 +133,30 @@ let rec eval (env : env) (e : expr) : value =
       let v1 = eval env e1 in
       let v2 = eval env e2 in
       apply_binop op v1 v2
-  | Pipe (e1, e2) ->
-      let v1 = eval env e1 in
-      let fn_val = eval env e2 in
-      (match fn_val with
-       | VClosure ([param], body, closure_env) ->
-           eval ((param, v1) :: closure_env) body
-       | VClosure (param :: rest, body, closure_env) ->
-           VClosure (rest, body, (param, v1) :: closure_env)
-       | _ -> raise (EvalError "RHS of pipe (|>) must evaluate to a function closure"))
+  
+  (* Flow (->) and Pipe (|>) handling *)
+  | Flow (e1, e2) | Pipe (e1, e2) ->
+      apply_flow env e1 e2
+
+  (* Standalone structural operators *)
+  | Split branches ->
+      VVec (List.map (eval env) branches)
+  | Scatter target ->
+      let v_t = eval env target in
+      VTagged ("scatter", v_t)
+  | Decompose basis ->
+      let v_b = eval env basis in
+      VTagged ("decompose", v_b)
+  | Cover (w_expr, s_expr) ->
+      let w_val = eval env w_expr in
+      let s_val = eval env s_expr in
+      VTagged ("cover", VVec [w_val; s_val])
+  | Shift d_expr ->
+      let d_val = eval env d_expr in
+      VTagged ("shift", d_val)
+  | Cast t ->
+      VTagged ("cast", VString t)
+
   | If (cond, e1, e2) ->
       (match eval env cond with
        | VBool true -> eval env e1
@@ -131,6 +175,66 @@ let rec eval (env : env) (e : expr) : value =
              let extended_env = List.combine params arg_vals @ closure_env in
              eval extended_env body
        | _ -> raise (EvalError "Attempted to call a non-function value"))
+
+and apply_flow (env : env) (e1 : expr) (e2 : expr) : value =
+  let v1 = eval env e1 in
+  match e2 with
+  (* 1. Split flow: data -> split { f1, f2, ... } *)
+  | Split branches ->
+      let results = List.map (fun branch ->
+        match branch with
+        | Lambda ([param], body) ->
+            eval ((param, v1) :: env) body
+        | Ident id ->
+            let f_val = eval env (Ident id) in
+            (match f_val with
+             | VClosure ([param], body, c_env) -> eval ((param, v1) :: c_env) body
+             | _ -> f_val)
+        | other -> eval env other
+      ) branches in
+      VVec results
+
+  (* 2. Shift flow: data -> shift(delta) *)
+  | Shift d_expr ->
+      let d_val = eval env d_expr in
+      (match (v1, d_val) with
+       | (VVec items, VInt offset) ->
+           VVec (shift_list offset items)
+       | _ -> raise (EvalError "Shift expects vector input and integer offset"))
+
+  (* 3. Cover flow: data -> cover(window, step) *)
+  | Cover (w_expr, s_expr) ->
+      let w_val = eval env w_expr in
+      let s_val = eval env s_expr in
+      (match (v1, w_val, s_val) with
+       | (VVec items, VInt w, VInt s) ->
+           let covered = cover_list w s items in
+           VVec (List.map (fun slice -> VVec slice) covered)
+       | _ -> raise (EvalError "Cover expects vector input and integer window/step parameters"))
+
+  (* 4. Cast flow: data -> cast(Type) *)
+  | Cast type_name ->
+      VTagged (type_name, v1)
+
+  (* 5. Scatter flow: data -> scatter(lanes) *)
+  | Scatter target_expr ->
+      let target_val = eval env target_expr in
+      VRecord [("scatter_data", v1); ("target", target_val)]
+
+  (* 6. Decompose flow: data -> decompose(basis) *)
+  | Decompose basis_expr ->
+      let basis_val = eval env basis_expr in
+      VRecord [("source", v1); ("basis", basis_val)]
+
+  (* 7. General function / closure flow: data -> fn *)
+  | _ ->
+      let fn_val = eval env e2 in
+      (match fn_val with
+       | VClosure ([param], body, closure_env) ->
+           eval ((param, v1) :: closure_env) body
+       | VClosure (param :: rest, body, closure_env) ->
+           VClosure (rest, body, (param, v1) :: closure_env)
+       | _ -> raise (EvalError "RHS of flow (->) must be an engine or function closure"))
 
 let eval_decl (env : env) (d : decl) : env * string option =
   match d with

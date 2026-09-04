@@ -22,13 +22,49 @@ let test_vector_vector_add () =
   assert (res = VVec [VInt 11; VInt 22; VInt 33]);
   print_endline "[PASS] test_vector_vector_add"
 
-let test_pipe_expression () =
-  let prog_str = "fn double(x) = x * 2;\n10 |> double" in
+let test_flow_arrow () =
+  let prog_str = "fn double(x) = x * 2;\n10 -> double" in
   let lexbuf = Lexing.from_string prog_str in
   let prog = Parser.program_file Lexer.read lexbuf in
   let results = Eval.eval_program prog in
   assert (List.mem "20" results);
-  print_endline "[PASS] test_pipe_expression"
+  print_endline "[PASS] test_flow_arrow (->)"
+
+let test_structural_shift () =
+  let prog_str = "[1, 2, 3, 4] -> shift(1)" in
+  let lexbuf = Lexing.from_string prog_str in
+  let prog = Parser.program_file Lexer.read lexbuf in
+  let results = Eval.eval_program prog in
+  assert (List.mem "[4, 1, 2, 3]" results);
+  print_endline "[PASS] test_structural_shift"
+
+let test_structural_cover () =
+  let prog_str = "[10, 20, 30, 40] -> cover(2, 1)" in
+  let lexbuf = Lexing.from_string prog_str in
+  let prog = Parser.program_file Lexer.read lexbuf in
+  let results = Eval.eval_program prog in
+  assert (List.mem "[[10, 20], [20, 30], [30, 40]]" results);
+  print_endline "[PASS] test_structural_cover"
+
+let test_structural_split () =
+  let prog_str = "
+fn add_ten(x) = x + 10;
+fn times_two(x) = x * 2;
+5 -> split { add_ten, times_two }
+" in
+  let lexbuf = Lexing.from_string prog_str in
+  let prog = Parser.program_file Lexer.read lexbuf in
+  let results = Eval.eval_program prog in
+  assert (List.mem "[15, 10]" results);
+  print_endline "[PASS] test_structural_split"
+
+let test_structural_cast () =
+  let prog_str = "[100, 200] -> cast(BioTelemetry)" in
+  let lexbuf = Lexing.from_string prog_str in
+  let prog = Parser.program_file Lexer.read lexbuf in
+  let results = Eval.eval_program prog in
+  assert (List.mem "BioTelemetry([100, 200])" results);
+  print_endline "[PASS] test_structural_cast"
 
 let test_contract_generation () =
   let contract_code = "
@@ -58,6 +94,10 @@ let () =
   test_scalar_math ();
   test_vectorized_math ();
   test_vector_vector_add ();
-  test_pipe_expression ();
+  test_flow_arrow ();
+  test_structural_shift ();
+  test_structural_cover ();
+  test_structural_split ();
+  test_structural_cast ();
   test_contract_generation ();
   print_endline "All tests passed successfully!"

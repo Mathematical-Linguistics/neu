@@ -9,6 +9,7 @@
 
 %token LET IN IF THEN ELSE FN
 %token CONTRACT RULE SET_DOSAGE SUPPRESS_DOSAGE
+%token SPLIT SCATTER DECOMPOSE COVER SHIFT CAST
 %token PLUS MINUS STAR SLASH
 %token EQUAL_EQUAL LESS_EQUAL GREATER_EQUAL LESS GREATER
 %token PIPE ARROW EQUAL
@@ -16,6 +17,11 @@
 %token COMMA COLON SEMICOLON DOT_DOT
 %token SYNTHESIS ANALYSIS TRANSFORMATION
 %token EOF
+
+%right ARROW PIPE
+%left PLUS MINUS
+%left STAR SLASH
+%nonassoc EQUAL_EQUAL LESS_EQUAL GREATER_EQUAL LESS GREATER
 
 %start <Ast.program> program_file
 %start <Ast.expr> single_expr
@@ -83,10 +89,11 @@ single_expr:
   | e = expr; EOF { e }
 
 expr:
-  | e = pipe_expr { e }
+  | e = flow_expr { e }
 
-pipe_expr:
-  | e1 = pipe_expr; PIPE; e2 = logic_expr { Pipe (e1, e2) }
+flow_expr:
+  | e1 = flow_expr; ARROW; e2 = logic_expr { Flow (e1, e2) }
+  | e1 = flow_expr; PIPE; e2 = logic_expr  { Pipe (e1, e2) }
   | e = logic_expr { e }
 
 logic_expr:
@@ -118,6 +125,13 @@ atom_expr:
   | id = IDENT { Ident id }
   | LBRACKET; items = separated_list(COMMA, expr); RBRACKET { Vec items }
   | LBRACE; fields = separated_list(COMMA, record_field); RBRACE { Record fields }
+  | SPLIT; LBRACE; branches = separated_list(COMMA, expr); RBRACE { Split branches }
+  | SPLIT; LPAREN; branches = separated_list(COMMA, expr); RPAREN { Split branches }
+  | SCATTER; LPAREN; target = expr; RPAREN { Scatter target }
+  | DECOMPOSE; LPAREN; basis = expr; RPAREN { Decompose basis }
+  | COVER; LPAREN; w = expr; COMMA; s = expr; RPAREN { Cover (w, s) }
+  | SHIFT; LPAREN; d = expr; RPAREN { Shift d }
+  | CAST; LPAREN; t = IDENT; RPAREN { Cast t }
   | LET; id = IDENT; EQUAL; e1 = expr; IN; e2 = expr { Let (id, e1, e2) }
   | IF; c = expr; THEN; e1 = expr; ELSE; e2 = expr { If (c, e1, e2) }
   | LPAREN; e = expr; RPAREN { e }
