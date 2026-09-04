@@ -1,0 +1,994 @@
+\documentclass[11pt,letterpaper]{article}
+
+% ── Packages ──
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{enumitem}
+\usepackage{amsmath,amssymb}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{parskip}
+\usepackage{microtype}
+\usepackage{listings}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{float}
+
+% ── Colors ──
+\definecolor{linkblue}{HTML}{2563EB}
+\definecolor{sectioncolor}{HTML}{1E293B}
+\definecolor{accentpurple}{HTML}{7C3AED}
+\definecolor{enginegreen}{HTML}{059669}
+\definecolor{ocamlorange}{HTML}{EA580C}
+\definecolor{codebg}{HTML}{F8FAFC}
+
+% ── Hyperref ──
+\hypersetup{
+  colorlinks=true,
+  linkcolor=sectioncolor,
+  citecolor=accentpurple,
+  urlcolor=linkblue,
+  pdftitle={Neu: A Polyglot Architecture for Equitable Biomedical Computing},
+  pdfauthor={Erick O. Oduniyi},
+}
+
+% ── Sections ──
+\titleformat{\section}{\Large\bfseries\color{sectioncolor}}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries\color{sectioncolor}}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\color{sectioncolor}}{\thesubsubsection}{1em}{}
+
+% ── Header/Footer ──
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textit{Neu: A Polyglot Architecture for Equitable Biomedical Computing}}
+\fancyhead[R]{\small\textit{2026}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ── Code Listings ──
+\lstdefinelanguage{neu}{
+  keywords={fn, let, type, trait, impl, match, module, use, await, own, dataframe, pipe},
+  keywordstyle=\color{accentpurple}\bfseries,
+  commentstyle=\color{enginegreen}\itshape,
+  stringstyle=\color{linkblue},
+  morecomment=[l]{//},
+  morestring=[b]",
+}
+
+\lstset{
+  language=neu,
+  basicstyle=\small\ttfamily,
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{sectioncolor!20},
+  breaklines=true,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  tabsize=2,
+  xleftmargin=1em,
+  framexleftmargin=0.5em,
+}
+
+% ── Custom Commands ──
+\newcommand{\keyword}[1]{\textbf{\textcolor{accentpurple}{#1}}}
+\newcommand{\neu}{\textsc{Neu}}
+\newcommand{\aie}{\textsc{aie}}
+\newcommand{\cgen}{\textsc{cgen-dlang}}
+\newcommand{\doi}[1]{\url{https://doi.org/#1}}
+
+\begin{document}
+
+% ══════════════════════════════════════════════════════════
+% TITLE
+% ══════════════════════════════════════════════════════════
+\begin{titlepage}
+\centering
+\vspace*{2cm}
+
+{\Huge\bfseries\color{sectioncolor} Neu}
+
+\vspace{0.5cm}
+
+{\Large A Polyglot Architecture Connecting\\[0.3em]
+Computational Theory, Language Design, and\\[0.3em]
+Participatory Biomedical Infrastructure}
+
+\vspace{2cm}
+
+{\large Erick Olusoji Oduniyi}
+
+\vspace{0.5cm}
+
+{\normalsize Intelligent-Interfaces Group}
+
+\vspace{0.5cm}
+
+{\normalsize 2026}
+
+\vspace{2cm}
+
+\begin{abstract}
+\noindent
+We present \neu{}, a polyglot software architecture that connects three layers of computational infrastructure: \aie{} (ai expressions), a theoretical framework for classifying computational processes by their information-theoretic behavior; a language design synthesizing features from OCaml, TypeScript, and R; and \cgen{} (Community Generated Design Language), a participatory evolutionary co-design framework. The architecture places TypeScript at the center of a polyglot system, with OCaml providing the formal kernel (type safety, module functors, exhaustive validation) and R providing the analytical layer (data frames, statistical modeling, vectorized computation). We implement this architecture as a microfrontend pipeline of composable Web Component modules, each classified by \aie{} engine type (synthesis, analysis, transformation) and language layer. We demonstrate the system in the domain of equitable biomedicine, where communities participate in drug discovery and disease spectroscopy while retaining data sovereignty, provenance tracking, and compensation rights. The contribution is threefold: (1) a formal connection between information-theoretic process classification and programming language type systems, (2) a concrete polyglot architecture that leverages each language's strengths without requiring a new compiler, and (3) a microfrontend module system where visual interface components are typed computational engines with traceable data flow.
+\end{abstract}
+
+\vfill
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+% ══════════════════════════════════════════════════════════
+% SECTION 1: INTRODUCTION
+% ══════════════════════════════════════════════════════════
+\section{Introduction}
+
+Programming languages are typically designed in isolation: a type system here, a data model there, a concurrency primitive somewhere else. Practitioners then stitch these languages together through foreign function interfaces, serialization boundaries, and build system complexity. The result is that the theoretical properties a language guarantees---type safety, effect tracking, memory safety---dissolve at the boundary between systems.
+
+This paper describes \neu{}, an architecture that takes a different approach. Rather than designing a single new language (though we sketch one), we connect three existing languages---OCaml, TypeScript, and R---through a shared theoretical framework called \aie{} (ai expressions) and a shared application framework called \cgen{} (Community Generated Design Language). Each language handles what it does best:
+
+\begin{description}[leftmargin=*,style=nextline]
+  \item[OCaml] provides the formal kernel: algebraic data types, exhaustive pattern matching, module functors, and type inference. It defines the grammar of valid computations.
+  \item[TypeScript] provides the orchestration hub: async coordination, web platform access, the application layer, microfrontend composition, and the evolutionary co-design framework.
+  \item[R] provides the analytical layer: first-class data frames, vectorized operations, statistical modeling, and visualization.
+\end{description}
+
+The connecting tissue is \aie{}, which classifies every computational process as one of three engine types based on information-theoretic behavior:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Synthesis engines}: processes that increase information content ($H(S_n) > H(S_1)$)
+  \item \textbf{Analysis engines}: processes that decrease information content ($H(S_n) < H(S_1)$)
+  \item \textbf{Transformations}: processes that preserve information content ($H(S_n) = H(S_1)$)
+\end{itemize}
+
+This classification is not merely taxonomic. When embedded in a type system, it becomes a compile-time property: the system can verify that a pipeline stage labeled ``analysis'' actually reduces information, that a ``transformation'' does not silently drop data, and that an ``application'' (which composes both synthesis and analysis) maintains the governance properties required by its domain.
+
+We demonstrate the architecture in the domain of equitable biomedicine---specifically, participatory drug discovery and disease spectroscopy---where the formal properties matter concretely: data sovereignty requires that patient data never leaves its origin without tracked consent, attribution requires provenance at every pipeline stage, and community governance requires that the fitness function driving evolutionary optimization is shaped by the people affected by the outcomes.
+
+The paper is organized as follows. Section~\ref{sec:math} establishes the mathematical foundations connecting information theory, category theory, and graph signal processing to the \aie{} framework. Section~\ref{sec:aie} presents the \aie{} theoretical framework. Section~\ref{sec:neu-design} describes the \neu{} language design and its mapping to existing languages. Section~\ref{sec:polyglot} details the polyglot architecture with OCaml, TypeScript, and R, including the delegation principle, OCaml's compilation reach from FPGA hardware to browser UI, and the role of compiler-driven frameworks like Svelte. Section~\ref{sec:cgen} describes the \cgen{} participatory framework. Section~\ref{sec:microfrontends} presents the microfrontend module system. Section~\ref{sec:biomedicine} demonstrates the application to equitable biomedicine. Section~\ref{sec:related} discusses related work, and Section~\ref{sec:conclusion} concludes.
+
+% ══════════════════════════════════════════════════════════
+% SECTION 2: MATHEMATICAL FOUNDATIONS
+% ══════════════════════════════════════════════════════════
+\section{Mathematical Foundations}
+\label{sec:math}
+
+The \aie{} framework draws on three mathematical traditions: information theory, category theory, and graph signal processing. This section identifies the formal structures that underpin the engine classification and connects them to existing mathematical results.
+
+\subsection{The Data Processing Inequality and Engine Classification}
+
+The classification of engines by entropy behavior is grounded in a fundamental result of information theory: the \keyword{Data Processing Inequality} (DPI). For a Markov chain $X \rightarrow Y \rightarrow Z$, the DPI states:
+\begin{align}
+    I(X; Z) \leq I(X; Y)
+\end{align}
+where $I(\cdot;\cdot)$ denotes mutual information. Equivalently, processing cannot increase the information that a signal carries about its source~\cite{cover2006}. This is the formal basis for \aie{}'s analysis engines: any deterministic function applied to a random variable can only decrease or preserve entropy, never increase it.
+
+Synthesis engines appear to violate the DPI, but the resolution is that they introduce \textit{new} information---from external sources, random number generators, or learned generative models. A synthesis engine $E_S$ with access to an external source $W$ satisfies:
+\begin{align}
+    H(E_S(S, W)) > H(S) \quad \text{when} \quad I(W; S) < H(W)
+\end{align}
+The new information comes from $W$, not from processing $S$ alone. In the \cgen{} framework, $W$ is the community's votes and the stochastic operators (mutation, crossover). In the biomedical pipeline, $W$ is the molecular dynamics simulation or the AlphaFold structure prediction.
+
+Transformations are the special case where processing is \textit{invertible}: a bijective function $f: S \rightarrow S'$ satisfies $H(S') = H(S)$. Format conversions, lossless compression, and grammar validation (which either passes or rejects, but does not alter the candidate) are transformations.
+
+\subsection{The Information Bottleneck and Pipeline Design}
+
+Tishby, Pereira, and Bialek's \keyword{Information Bottleneck} (IB) method~\cite{tishby2000} provides a formal framework for the tradeoff between compression and prediction. Given an input $X$ and a target $Y$, the IB seeks a compressed representation $T$ that minimizes $I(X; T)$ (compression) while maximizing $I(T; Y)$ (prediction):
+\begin{align}
+    \min_{p(t|x)} \left[ I(X; T) - \beta \, I(T; Y) \right]
+\end{align}
+
+Shwartz-Ziv and Tishby~\cite{shwartzziv2017} applied this to deep neural networks, showing that training proceeds in two phases: a \textit{fitting phase} where mutual information $I(T; Y)$ increases (the network learns to predict), followed by a \textit{compression phase} where $I(X; T)$ decreases (the network discards irrelevant input features). This two-phase structure maps directly onto \aie{}'s engine classification:
+
+\begin{itemize}[leftmargin=*]
+  \item The \textbf{fitting phase} is a synthesis engine: the network's internal representation gains information about the target.
+  \item The \textbf{compression phase} is an analysis engine: the representation sheds information about the input that is irrelevant to the target.
+\end{itemize}
+
+The disease spectroscopy pipeline exhibits the same structure. The measurement stage captures a high-dimensional spectral signal (fitting/synthesis relative to the clinical question). The classification stage compresses that signal to a risk score (compression/analysis). The IB framework provides the mathematical criterion for evaluating whether the pipeline achieves the optimal tradeoff between retaining clinically relevant biomarker information and discarding noise.
+
+\subsection{Categorical Semantics of Signal Flow}
+
+Bonchi, Soboci\'{n}ski, and Zanasi~\cite{bonchi2014} developed a categorical semantics for signal flow graphs, showing that linear signal processing systems can be formalized as morphisms in a symmetric monoidal category. Their key result: signal flow graphs compose according to the algebraic laws of a PROP (products and permutations category), and the denotational semantics (what the system computes) can be related to operational semantics (how it executes) through categorical equivalence.
+
+This is directly relevant to \aie{}'s engine composition. When we write $E = f_1 \rightarrow \cdots \rightarrow f_n$, we are composing morphisms in a category where:
+\begin{itemize}[leftmargin=*]
+  \item Objects are state types (the data flowing through the pipeline)
+  \item Morphisms are engines (typed by their information-theoretic behavior)
+  \item Composition is sequential pipeline connection
+  \item The monoidal product is parallel execution
+\end{itemize}
+
+The engine classification (synthesis/analysis/transformation) then becomes a \textit{grading} on the category: a functor from the pipeline category to an ordered monoid $(\{-1, 0, +1\}, +)$ where $+1$ denotes synthesis, $-1$ denotes analysis, and $0$ denotes transformation. The grade of a composed pipeline is the sum of its stages' grades, giving a coarse but useful characterization of the pipeline's net information behavior.
+
+\subsection{Applied Category Theory: Compositionality and Open Systems}
+
+Fong and Spivak's \textit{Seven Sketches in Compositionality}~\cite{fong2019} provides the broader mathematical context. Their treatment of applied category theory covers:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Co-design via profunctors} (Chapter 4): formalizes how components with specified interfaces compose into systems. This is the mathematical structure underlying our microfrontend module system, where modules declare typed input and output ports.
+  \item \textbf{Signal flow graphs via PROPs} (Chapter 5): formalizes the algebraic structure of signal processing pipelines, directly applicable to the spectroscopy pipeline.
+  \item \textbf{Collaborative design via enriched categories}: formalizes how multiple agents (community members in \cgen{}) contribute to a shared design space with quantifiable preferences.
+\end{itemize}
+
+Foley, Breiner, Subrahmanian, and Dusel~\cite{foley2021} extend this to complex system design using \keyword{operads}---algebraic structures that formalize how operations with multiple inputs and one output compose. Their CASCADE framework uses operads for ``complex system design specification, analysis and synthesis''---notably, the same three terms that \aie{} uses for its engine classification. In their framework, operads provide the grammar for valid system compositions, while operad algebras provide the semantics. This parallels \cgen{}'s component grammar (the operad) and component library (the algebra).
+
+\subsection{Semantic Entropy and Communication}
+
+Recent work on semantic communication~\cite{yang2024} introduces a category-theoretic framework for \keyword{semantic entropy}---entropy measured not over raw symbols but over their meanings relative to a knowledge base. This connects to \aie{}'s concept of ``semantic syncing'' (Chapter 5 of the ai expressions book): the act of aligning two representational systems. In the categorical framework, semantic entropy reduction is achieved by exploiting dependencies captured in a knowledge base, formalized as a functor from a syntactic category to a semantic category.
+
+For the biomedical application, this means that the ``information'' in \aie{}'s engine classification is not merely Shannon entropy over bit strings, but \textit{semantic} information relative to the clinical domain. A spectral measurement that is high-entropy in the signal-processing sense may be low-entropy in the clinical sense if it unambiguously indicates a specific biomarker. The engine classification should ultimately be graded by semantic entropy, not raw Shannon entropy---a direction for future formalization.
+
+\subsection{Summary of Mathematical Connections}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{lXl}
+\toprule
+\textbf{Mathematical Structure} & \textbf{Connection to \aie{}/\neu{}} & \textbf{Source} \\
+\midrule
+Data Processing Inequality & Analysis engines cannot increase information; synthesis requires external source & Cover \& Thomas \\
+\addlinespace
+Information Bottleneck & Pipeline stages trade off compression vs.\ prediction; fitting = synthesis, compression = analysis & Tishby et al. \\
+\addlinespace
+Categorical signal flow (PROPs) & Engine composition is morphism composition in a symmetric monoidal category & Bonchi et al. \\
+\addlinespace
+Operads for system design & Component grammars are operads; component libraries are operad algebras & Foley et al. \\
+\addlinespace
+Profunctors for co-design & Module ports and typed connections formalize as profunctors between interface categories & Fong \& Spivak \\
+\addlinespace
+Semantic entropy & Engine classification should be graded by semantic, not raw Shannon, entropy & Yang et al. \\
+\bottomrule
+\end{tabularx}
+\caption{Mathematical structures underlying the \aie{} framework.}
+\label{tab:math-connections}
+\end{table}
+
+% ══════════════════════════════════════════════════════════
+% SECTION 3: AI EXPRESSIONS
+% ══════════════════════════════════════════════════════════
+\section{AI Expressions: A Theoretical Framework}
+\label{sec:aie}
+
+\aie{} (ai expressions) is a theoretical framework for describing and manipulating \keyword{process architectures} (engines), \keyword{functions} (flows), and \keyword{operations} (orchestras). It is derived from category theory, information theory, and graph signal processing. This section formalizes the core constructs.
+
+\subsection{Engines}
+
+An engine is a process or sequence of functions applied to a state $S$. Engines are classified by their effect on the information content (Shannon entropy $H$) of the state.
+
+\subsubsection{Synthesis Engines}
+
+A synthesis engine is a process that creates or adds information:
+\begin{align}
+    E_S : f_1 \rightarrow \cdots \rightarrow f_n \in \lbrace S_n, S_1 \mid H(S_n) > H(S_1) \rbrace
+\end{align}
+
+Examples include: generating molecular candidates, composing treatment protocols, creating spectral models from molecular dynamics simulations, and producing novel designs from evolutionary crossover and mutation.
+
+\subsubsection{Analysis Engines}
+
+An analysis engine is a process that removes or subtracts information:
+\begin{align}
+    E_A : f_1 \rightarrow \cdots \rightarrow f_n \in \lbrace S_n, S_1 \mid H(S_n) < H(S_1) \rbrace
+\end{align}
+
+Examples include: spectroscopic detection (reducing a biological sample to a risk score), feature extraction, fitness evaluation, community voting and selection, and ML classification.
+
+\subsubsection{Transformations}
+
+A transformation is a process that preserves information:
+\begin{align}
+    T : f_1 \rightarrow \cdots \rightarrow f_n \in \lbrace S_n, S_1 \mid H(S_n) = H(S_1) \rbrace
+\end{align}
+
+Examples include: federated learning aggregation (reshaping model weights without losing patient information), data format conversions, provenance logging, and grammar validation.
+
+\subsection{Functions and Operations}
+
+\keyword{Functions} (flows) are mathematical functions that compose into engines. Any function $f: A \rightarrow B$ can serve as a stage in an engine pipeline.
+
+\keyword{Operations} are unary, binary, or ternary operations applied within and across functions. In the \cgen{} framework, the evolutionary operators \texttt{compare()}, \texttt{mutate()}, and \texttt{cross()} are operations.
+
+\subsection{Applications}
+
+An \keyword{application} is a system that utilizes both synthesis and analysis engines. Applications are the first composite structure in \aie{}:
+
+\begin{align}
+    \text{Application} = \lbrace E_{S_1}, \ldots, E_{S_m} \rbrace \cup \lbrace E_{A_1}, \ldots, E_{A_k} \rbrace
+\end{align}
+
+The \cgen{} framework is an application: it synthesizes new candidates (mutation, crossover) and analyzes them (fitness evaluation, community voting, selection).
+
+\subsection{Environments}
+
+An \keyword{environment} runs applications. Unlike the previous constructs, environments are not theoretical machines---they are resource-dependent systems. A hospital network running federated learning, a community data cooperative governing research access, or an HPC cluster performing molecular dynamics simulations are all environments in the \aie{} sense.
+
+\subsection{Expressions}
+
+The framework is called ``ai expressions'' because everything is an expression---every construct returns a value, every process has a classifiable information-theoretic signature, and the entire system is compositional. This mirrors the expression-oriented design of functional programming languages, which is not coincidental: the \neu{} language design makes this connection explicit.
+
+% ══════════════════════════════════════════════════════════
+% SECTION 3: NEU LANGUAGE DESIGN
+% ══════════════════════════════════════════════════════════
+\section{The Neu Language Design}
+\label{sec:neu-design}
+
+\neu{} is a language design that synthesizes features from five languages, selected for complementary strengths: JavaScript (ubiquity, async), R (data primitives, vectorized operations), Haskell (type system, effect tracking), Rust (memory safety, traits), and OCaml (module system, pragmatic FP). The design is guided by five principles:
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Expression-oriented}: everything returns a value (Haskell, OCaml, Rust).
+  \item \textbf{Data-first}: tabular data and vectors are language primitives, not libraries (R).
+  \item \textbf{Safe by default}: no nulls, no exceptions; algebraic error handling via \texttt{Result} and \texttt{Option} (Rust, Haskell).
+  \item \textbf{Pragmatically functional}: pure by default with explicit effects, but mutability is available (OCaml).
+  \item \textbf{Runs everywhere}: compiles to native, WebAssembly, and can be interpreted in a REPL (JavaScript's reach, R's exploratory workflow).
+\end{enumerate}
+
+\subsection{Type System}
+
+From Haskell and OCaml, \neu{} takes algebraic data types, parametric polymorphism, and type inference. From Rust, traits as practical typeclasses. From TypeScript, structural typing for record types.
+
+\begin{lstlisting}
+// Algebraic data types
+type Result<T, E> = Ok(T) | Err(E)
+type Option<T> = Some(T) | None
+
+// Structural record types
+type User = { name: String, age: Int }
+
+// Traits
+trait Summarize {
+  fn summary(self) -> String
+}
+
+impl Summarize for User {
+  fn summary(self) -> String = "{self.name}, age {self.age}"
+}
+\end{lstlisting}
+
+The critical extension for \aie{} is that engine classification becomes a type-level property:
+
+\begin{lstlisting}
+trait SynthesisEngine<S> {
+  fn run(self, state: S) -> S  // H(output) > H(input)
+}
+
+trait AnalysisEngine<S> {
+  fn run(self, state: S) -> S  // H(output) < H(input)
+}
+\end{lstlisting}
+
+\subsection{Data as a Primitive}
+
+From R, vectors and data frames are first-class. Vectorized operations and pipe operators are built into the language:
+
+\begin{lstlisting}
+let df = dataframe {
+  name:  ["Alice", "Bob", "Carol"],
+  score: [92, 87, 95],
+}
+
+let result = df
+  |> filter(.score > 90)
+  |> select(.name, .score)
+  |> mutate(curved = .score + 5)
+\end{lstlisting}
+
+\subsection{Effect System}
+
+From Haskell, side effects are tracked in the type system. From JavaScript, \texttt{async/await} provides ergonomic syntax. The effect signature documents what a function does:
+
+\begin{lstlisting}
+fn read_config(path: String) -> IO<Result<Config, FileError>> {
+  let contents = await fs.read(path)?
+  parse_config(contents)
+}
+\end{lstlisting}
+
+For the biomedical domain, this means federated computation boundaries are type boundaries:
+
+\begin{lstlisting}
+fn detect_dementia(sample: own BloodSample)
+  -> Federated<IO<Result<RiskScore, DetectionError>>> {
+  sample
+    |> measure_atr_ftir()
+    |> preprocess_spectra()
+    |> classify_risk()
+    |> log_provenance()
+    |> trigger_compensation()
+}
+\end{lstlisting}
+
+The \texttt{own} keyword (from Rust) signals that the patient's data does not leave their control. \texttt{Federated<IO<...>>} signals distributed computation. \texttt{log\_provenance()} and \texttt{trigger\_compensation()} are effects visible in the type signature---they cannot be omitted.
+
+\subsection{Module System}
+
+From OCaml, \neu{} takes module functors---modules parameterized by other modules:
+
+\begin{lstlisting}
+module MakeCgen(Domain: ComponentDomain) {
+  fn evolve(population: Library, fitness: fn(Component) -> Score)
+    -> IO<Library> {
+    population
+      |> evaluate(fitness)
+      |> select_by_vote()
+      |> mutate(Domain.grammar)
+      |> cross(Domain.grammar)
+  }
+}
+
+module BioCgen = MakeCgen(BioComponents)
+\end{lstlisting}
+
+This is how \cgen{} becomes domain-agnostic: the same evolutionary framework operates over visual design assets, molecular structures, or spectroscopic biomarker signatures by swapping the domain module.
+
+% ══════════════════════════════════════════════════════════
+% SECTION 4: POLYGLOT ARCHITECTURE
+% ══════════════════════════════════════════════════════════
+\section{The Polyglot Architecture: OCaml--TypeScript--R}
+\label{sec:polyglot}
+
+While \neu{} describes an ideal language, building a compiler is a multi-year effort. The polyglot architecture achieves approximately 80\% of \neu{}'s guarantees today by distributing responsibilities across three existing languages, connected through well-defined interfaces.
+
+\subsection{Design Decision: TypeScript in the Middle}
+
+The architecture places TypeScript at the center, with OCaml and R at the periphery. This is a deliberate choice based on practical constraints:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{OCaml in the middle} would require OCaml to handle web APIs, async orchestration, UI rendering, and general application plumbing---areas where its ecosystem is thin.
+  \item \textbf{TypeScript in the middle} leverages the npm ecosystem for connectivity (WebR, Apache Arrow, Melange output, HTTP, WebAssembly, browser APIs) while letting OCaml and R focus on their strengths.
+\end{itemize}
+
+The resulting architecture:
+
+\begin{verbatim}
+        +-----------+
+        |   OCaml   |  formal kernel
+        |   (AIE)   |  engines, functors, types
+        +-----+-----+
+              | Melange -> JS
+              v
+     +-----------------+
+     |   TypeScript    |  orchestration hub
+     |  (Neu / cgen)   |  application, async, UI, provenance
+     +----+--------+---+
+          |        |
+     Arrow|        | WebR / Plumber
+          v        v
+     +-------+ +-------+
+     |   R   | |   R   |  data analysis
+     |       | |       |  statistics, spectral, viz
+     +-------+ +-------+
+\end{verbatim}
+
+\subsection{OCaml to TypeScript via Melange}
+
+Melange (formerly BuckleScript) compiles OCaml to readable JavaScript with clean interop. The OCaml layer defines:
+
+\begin{itemize}[leftmargin=*]
+  \item The \aie{} engine algebra (synthesis, analysis, transformation types)
+  \item Module functors for domain parameterization
+  \item Exhaustive pattern matching for grammar validation
+  \item Type definitions that generate \texttt{.d.ts} declarations for TypeScript consumption
+\end{itemize}
+
+The compiled output is human-readable JavaScript that TypeScript imports with full type safety. OCaml's guarantees (exhaustive matching, type inference, functor correctness) are enforced at compile time in the OCaml layer and then consumed as typed interfaces in TypeScript.
+
+\subsection{TypeScript to R via Arrow and WebR}
+
+Two bridges connect TypeScript to R:
+
+\begin{description}[leftmargin=*,style=nextline]
+  \item[Apache Arrow] provides a columnar memory format that both TypeScript (\texttt{apache-arrow} npm package) and R (\texttt{arrow} R package) read and write natively. Data frames pass between languages with zero-copy semantics.
+  \item[WebR] compiles R to WebAssembly, allowing R to run directly in Node.js or the browser. TypeScript calls R's statistical functions without a separate R process.
+\end{description}
+
+\subsection{What Each Language Handles}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{lXl}
+\toprule
+\textbf{Language} & \textbf{Responsibility} & \textbf{\aie{} Role} \\
+\midrule
+OCaml & Engine algebra, module functors, grammar validation, type inference, pattern matching & Theory kernel \\
+\addlinespace
+TypeScript & Application orchestration, \cgen{} framework, async/effects, microfrontend UI, provenance tracking, evolutionary co-design & Application hub \\
+\addlinespace
+R & Data frames, vectorized operations, statistical modeling, spectral analysis, cohort summaries, visualization & Analysis layer \\
+\bottomrule
+\end{tabularx}
+\caption{Language responsibilities in the polyglot architecture.}
+\label{tab:language-roles}
+\end{table}
+
+\subsection{OCaml's Compilation Reach: From FPGA to Browser}
+
+A distinctive property of OCaml in this architecture is the breadth of its compilation targets. The same language---with the same type system, module functors, and pattern matching---can target radically different substrates:
+
+\begin{description}[leftmargin=*,style=nextline]
+  \item[Native code] OCaml's native compiler produces efficient machine code for backend services and CLI tools.
+  \item[JavaScript (Melange)] As described above, Melange compiles OCaml to readable JavaScript for browser and Node.js consumption.
+  \item[FPGA hardware (Hardcaml)] Hardcaml~\cite{hardcaml2023} is an OCaml-embedded DSL for Register Transfer Level (RTL) hardware design, developed and used in production at Jane Street. Engineers write OCaml code that compiles to synthesizable Verilog or VHDL for FPGA toolchains. Hardcaml provides cycle-accurate simulation, formal verification, and parametric hardware modules using OCaml's functors.
+\end{description}
+
+This means OCaml can define the formal engine algebra \textit{and} the hardware accelerators for compute-intensive pipeline stages. For the biomedical application, spectral preprocessing (FFT, baseline correction) and ML inference for the classification stage are exactly the kind of DSP workloads that FPGAs excel at. The same OCaml functors that parameterize the \cgen{} domain could parameterize Hardcaml hardware modules:
+
+\begin{verbatim}
+OCaml
+  |-- Melange -> JS -> Svelte/TypeScript (UI)
+  |-- Native -> backend services
+  +-- Hardcaml -> Verilog -> FPGA
+        |-- Spectral DSP (FFT, filtering)
+        |-- ML inference (classification)
+        +-- Cryptographic provenance
+\end{verbatim}
+
+\subsection{Svelte as the Rendering Layer}
+
+The microfrontend modules described in Section~\ref{sec:microfrontends} are currently implemented as Web Components with manual Shadow DOM rendering. A natural evolution is to adopt Svelte~\cite{svelte2019} as the rendering layer. Svelte and OCaml share a core philosophy: \textbf{move decisions from runtime to compile time}. Svelte compiles declarative UI components into minimal imperative JavaScript that directly mutates the DOM---no virtual DOM, no runtime diffing. This mirrors OCaml's approach of resolving type safety, exhaustive matching, and module resolution at compile time rather than runtime.
+
+The integration is direct: Melange compiles OCaml to clean JavaScript; Svelte components import JavaScript. OCaml-compiled engine types and grammar validators become reactive stores consumed by Svelte components. The extended architecture becomes:
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{lXl}
+\toprule
+\textbf{Layer} & \textbf{Technology} & \textbf{Role} \\
+\midrule
+Theory & \aie{} & Engine classification \\
+Formal kernel & OCaml & Types, functors, grammar \\
+Hardware & OCaml $\rightarrow$ Hardcaml $\rightarrow$ FPGA & Spectral DSP, ML inference \\
+UI components & Svelte (consuming OCaml via Melange) & Reactive microfrontends \\
+Orchestration & TypeScript & Pipeline wiring, async, \cgen{} \\
+Data analysis & R (via WebR/Arrow) & Statistics, visualization \\
+\bottomrule
+\end{tabularx}
+\caption{Extended architecture with Svelte and FPGA layers.}
+\label{tab:extended-arch}
+\end{table}
+
+\subsection{The Delegation Principle}
+
+A key architectural insight, validated by recent work in AI-assisted compiler construction~\cite{anthropic2025}, is that \textbf{correctness without optimization is insufficient when physical constraints apply}. Anthropic's engineering team demonstrated an AI system that wrote a self-hosting C compiler targeting x86, ARM, and RISC-V. The compiler could generate correct 16-bit x86 code using \texttt{0x66}/\texttt{0x67} opcode prefixes, but the resulting binary exceeded 60KB---far beyond the 32KB limit Linux enforces for real-mode boot code. Rather than compromising correctness, the system delegated that specific phase to GCC. On ARM and RISC-V, where instruction encodings do not require the prefix workaround, the compiler handled everything end-to-end.
+
+This is precisely the principle underlying our polyglot architecture. Each language in the stack handles what it does best, and delegates to specialized tools when a domain-specific constraint (type safety, statistical modeling, hardware synthesis, UI reactivity) is better served elsewhere:
+
+\begin{itemize}[leftmargin=*]
+  \item When grammar validation requires exhaustive pattern matching, delegate to OCaml.
+  \item When statistical analysis requires vectorized data frame operations, delegate to R.
+  \item When spectral DSP requires parallel hardware execution, delegate to FPGA via Hardcaml.
+  \item When reactive UI rendering requires compile-time DOM optimization, delegate to Svelte.
+  \item When pipeline orchestration requires async coordination and ecosystem connectivity, delegate to TypeScript.
+\end{itemize}
+
+The honest engineering move---admitting that a given phase is better handled by a specialized tool---is not a failure of the architecture. It \textit{is} the architecture. The skill is in knowing where the boundaries are and designing clean, typed interfaces between them. The \aie{} framework provides the shared vocabulary (engine types, information-theoretic classification) that makes these boundaries legible across languages and compilation targets.
+
+% ══════════════════════════════════════════════════════════
+% SECTION 5: CGEN-DLANG
+% ══════════════════════════════════════════════════════════
+\section{cgen-dlang: Participatory Evolutionary Co-Design}
+\label{sec:cgen}
+
+\cgen{} (Community Generated Design Language) is a collaborative design framework for small communities (5--50 people) who want to generate structures that reflect collective aesthetic or functional values through evolutionary processes~\cite{oduniyi2020}. The framework is domain-agnostic: its abstractions parameterize over the component type.
+
+\subsection{Core Abstractions}
+
+\begin{description}[leftmargin=*,style=nextline]
+  \item[Component Library] A collection of domain-specific primitives. In visual design: shapes, colors, textures. In biomedicine: molecular structures, biomarker signatures, drug compounds.
+  \item[Component Grammar] Rules defining valid operations on and between components. In visual design: composition rules. In biomedicine: Lipinski's Rule of Five, biochemical validity constraints, AlphaFold-validated structural viability.
+  \item[Voting Model] A schema for how the community evaluates candidates. The voting model is the mechanism by which human judgment enters the evolutionary loop.
+  \item[Evolutionary Operators] \texttt{compare()}, \texttt{mutate()}, and \texttt{cross()} drive iterative refinement. These are \aie{} operations applied within synthesis engines.
+  \item[Fitness Function] The aggregation of community votes and domain-specific metrics. In \cgen{}, the fitness function is collectively defined---it is not imposed by a single researcher or institution.
+\end{description}
+
+\subsection{cgen-dlang as an AIE Application}
+
+In \aie{} terms, \cgen{} is an application because it composes both synthesis and analysis engines:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Synthesis}: mutation and crossover generate new candidates (information increases)
+  \item \textbf{Analysis}: fitness evaluation and selection reduce the population (information decreases)
+  \item \textbf{Transformation}: grammar validation checks constraints without altering candidates (information preserved)
+\end{itemize}
+
+\subsection{Domain Parameterization}
+
+The key architectural insight is that \cgen{}'s abstractions are parameterized by domain. In the \neu{} design, this is an OCaml-style module functor:
+
+\begin{lstlisting}
+module MakeCgen(Domain: ComponentDomain) { ... }
+\end{lstlisting}
+
+In the TypeScript implementation, this becomes a generic interface:
+
+\begin{lstlisting}
+interface ComponentDomain<C, Constraints> {
+  validate(component: C, constraints: Constraints): Result<C, string>;
+  random(constraints: Constraints): C;
+  mutate(component: C, constraints: Constraints): C;
+  cross(a: C, b: C, constraints: Constraints): C;
+  compare(a: C, b: C): number;
+}
+\end{lstlisting}
+
+Swapping the domain from visual design to biomedicine requires implementing this interface for molecular structures---the evolutionary framework remains unchanged.
+
+\subsection{Provenance as Infrastructure}
+
+Every action in the \cgen{} loop generates a provenance record: who contributed, what was created, what was selected, who voted, and how candidates were transformed. This is not logging---it is infrastructure. In the biomedical domain, provenance is the mechanism by which attribution and compensation are enforced.
+
+% ══════════════════════════════════════════════════════════
+% SECTION 6: MICROFRONTENDS
+% ══════════════════════════════════════════════════════════
+\section{Microfrontend Module System}
+\label{sec:microfrontends}
+
+The visual interface is implemented as a pipeline of composable microfrontend modules. Each module is a Web Component (native custom element) that encapsulates its own rendering, state, and typed ports.
+
+\subsection{Module Architecture}
+
+Every module declares:
+
+\begin{itemize}[leftmargin=*]
+  \item A \textbf{manifest} specifying its \aie{} engine type, language layer, and version
+  \item Typed \textbf{input ports} and \textbf{output ports}
+  \item A \textbf{visual interface} rendered in its Shadow DOM
+\end{itemize}
+
+Modules communicate through a \keyword{MessageBus}---a publish-subscribe system where messages carry data, timestamps, and provenance chains. When a module emits data on an output port, the pipeline routes it to the connected module's input port, appending the source module to the provenance chain.
+
+\subsection{Pipeline Composition}
+
+The pipeline is wired declaratively:
+
+\begin{lstlisting}[language={}]
+pipeline.connect("component-library", "components",
+                  "grammar-validator",  "components");
+pipeline.connect("grammar-validator",  "valid-components",
+                  "evolution-engine",   "valid-components");
+pipeline.connect("evolution-engine",   "evolved",
+                  "spectral-pipeline",  "evolved");
+pipeline.connect("spectral-pipeline",  "results",
+                  "cohort-analysis",    "results");
+\end{lstlisting}
+
+This mirrors the \aie{} engine composition $f_1 \rightarrow \cdots \rightarrow f_n$ and R's pipe operator \texttt{|\textgreater}. The visual layout makes the data flow visible: users see data move from one module to the next.
+
+\subsection{Implemented Modules}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{llll}
+\toprule
+\textbf{Module} & \textbf{Engine Type} & \textbf{Language Layer} & \textbf{Function} \\
+\midrule
+Component Library & Synthesis & TypeScript & Generate molecular candidates \\
+Grammar Validator & Transformation & OCaml & Validate biochemical constraints \\
+Evolution Engine & Application & TypeScript & Community-guided evolutionary loop \\
+Spectral Pipeline & Analysis & TypeScript & Disease spectroscopy classification \\
+Cohort Analysis & Analysis & R & Statistical summaries and visualization \\
+Provenance Tracker & Transformation & TypeScript & Attribution chain across pipeline \\
+\bottomrule
+\end{tabularx}
+\caption{Microfrontend modules in the pipeline, classified by \aie{} engine type and language layer.}
+\label{tab:modules}
+\end{table}
+
+Each module is self-contained and independently deployable. The Grammar Validator is tagged as the OCaml layer (ready to be replaced with Melange-compiled OCaml). The Cohort Analysis is tagged as the R layer (ready to be backed by WebR or Arrow). TypeScript orchestrates the connections.
+
+\subsection{Visual Design}
+
+Modules are visually distinguished by engine type (border color: purple for synthesis, blue for analysis, green for transformation) and language layer (badge color: orange for OCaml, TypeScript blue, R blue). Port indicators show input (cyan) and output (pink) connections. The pipeline layout is horizontal, with arrow connectors between modules, making the data flow architecture immediately legible.
+
+% ══════════════════════════════════════════════════════════
+% SECTION 7: BIOMEDICINE APPLICATION
+% ══════════════════════════════════════════════════════════
+\section{Application: Equitable Biomedicine}
+\label{sec:biomedicine}
+
+The architecture is demonstrated in the domain of participatory personalized medicine and drug discovery. This domain demands exactly the properties the system provides: formal safety guarantees, community governance, data sovereignty, and traceable provenance.
+
+\subsection{The Detection Pipeline}
+
+The disease spectroscopy pipeline models biomarker detection for three disease categories:
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{llXl}
+\toprule
+\textbf{Disease} & \textbf{Method} & \textbf{Key Biomarkers} & \textbf{AIE Type} \\
+\midrule
+Dementia & ATR-FTIR & A$\beta$42 $\beta$-sheet (1630--1640 cm$^{-1}$), phospho-tau, neurofilament light & Analysis \\
+\addlinespace
+Diabetes & Mid-IR/NIR & Glucose (1035 cm$^{-1}$), HbA1c, triglycerides, AGEs & Analysis \\
+\addlinespace
+Respiratory & FTIR/SERS & Exhaled NO, breath acetone, IL-6 cytokine, surfactant lipids & Analysis \\
+\bottomrule
+\end{tabularx}
+\caption{Spectroscopic biomarker detection pipelines classified by \aie{} engine type.}
+\label{tab:disease-pipelines}
+\end{table}
+
+Each pipeline follows: biological sample $\rightarrow$ spectroscopic measurement $\rightarrow$ preprocessing $\rightarrow$ ML classification $\rightarrow$ clinical output. In \aie{} terms: the measurement and classification stages are analysis engines (reducing a complex biological sample to a risk score), and the preprocessing stage is a transformation (reformatting without information loss).
+
+\subsection{Extending cgen-dlang to Drug Discovery}
+
+The \cgen{} framework maps directly from the design domain to the biomedical domain:
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{lXX}
+\toprule
+\textbf{\cgen{} Concept} & \textbf{Design Domain} & \textbf{Biomedical Domain} \\
+\midrule
+Component Library & Pre-defined visual assets & Molecular structures, biomarker signatures \\
+Component Grammar & Rules for valid design operations & Lipinski's Rule of Five, AlphaFold constraints \\
+Voting Model & Community aesthetic preference & Community governance of research priorities \\
+Evolutionary Operators & compare, mutate, cross & Iterative refinement of drug candidates \\
+Fitness Function & Collective aesthetic judgment & Patient outcomes + efficacy + community values \\
+\bottomrule
+\end{tabularx}
+\caption{Mapping \cgen{} abstractions from design to personalized medicine.}
+\label{tab:cgen-mapping}
+\end{table}
+
+\subsection{Governance Principles}
+
+The architecture enforces seven governance principles through its type system and module structure:
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Data stays with the person.} The \texttt{Federated} effect type ensures computation goes to the data, not the reverse. The \texttt{own} keyword tracks data ownership.
+  \item \textbf{Transparent provenance.} Every module emits provenance records on its output port. The Provenance Tracker module aggregates the full attribution chain.
+  \item \textbf{Collective governance.} The \cgen{} voting model is the mechanism by which communities shape the evolutionary fitness function.
+  \item \textbf{Evolutionary co-design.} Drug candidates and treatment protocols are iteratively refined through community feedback loops, not top-down clinical trial structures.
+  \item \textbf{Attribution as infrastructure.} Provenance tracking is not an afterthought---it is a typed effect in the pipeline. A module cannot process data without emitting a provenance record.
+  \item \textbf{Compensation flows back.} When a model uses contributed data, the compensation effect fires. This is visible in the type signature and cannot be silently omitted.
+  \item \textbf{Right to withdraw.} Ownership semantics propagate revocation. If a participant withdraws consent, the type system propagates that constraint through the pipeline.
+\end{enumerate}
+
+\subsection{The Full Stack}
+
+Integrating all components, the architecture consists of six layers:
+
+\begin{description}[leftmargin=*,style=nextline]
+  \item[Layer 0: Biology] People, their biomarkers, their lived experience.
+  \item[Layer 1: Detection] Spectroscopic measurement (ATR-FTIR, Mid-IR, NIR, SERS). Governed by data sovereignty frameworks.
+  \item[Layer 2: Computation] Molecular dynamics, AlphaFold, HPC. Governed by federated learning and differential privacy.
+  \item[Layer 3: Classification] ML pipeline: spectral preprocessing $\rightarrow$ feature extraction $\rightarrow$ classification. Governed by community-defined thresholds.
+  \item[Layer 4: Governance] \cgen{} extended: data cooperatives, collective voting, evolutionary optimization, provenance tracking.
+  \item[Layer 5: Outcomes] Results returned to participants, revenue sharing, ongoing relationship, right to withdraw.
+\end{description}
+
+% ══════════════════════════════════════════════════════════
+% SECTION 8: RELATED WORK
+% ══════════════════════════════════════════════════════════
+\section{Related Work}
+\label{sec:related}
+
+\subsection{Polyglot and Multi-Language Systems}
+
+The challenge of connecting languages with different type systems and runtime models is well-studied. Foreign function interfaces (FFIs) are the traditional approach, but they typically sacrifice type safety at the boundary. Melange~\cite{melange2023} and js\_of\_ocaml~\cite{vouillon2014} compile OCaml to JavaScript while preserving OCaml's type guarantees. WebR~\cite{webr2024} compiles R to WebAssembly, enabling R execution in browser and Node.js environments. Apache Arrow~\cite{arrow2022} provides a language-independent columnar memory format for zero-copy data exchange. Our architecture combines these bridges through a shared theoretical framework (\aie{}) that classifies computations regardless of implementation language.
+
+\subsection{Effect Systems and Typed Side Effects}
+
+Haskell's monadic IO~\cite{peyton2003} demonstrated that side effects can be tracked in the type system. Algebraic effect systems~\cite{plotkin2009} generalize this to user-defined effects. Koka~\cite{leijen2014} implements row-polymorphic effects. Our approach approximates effect tracking in TypeScript using branded types---a pragmatic choice that provides documentation and intent signaling without full compiler support.
+
+\subsection{Participatory Design in Computing}
+
+Participatory Design originated in Scandinavian workplace democracy movements~\cite{schuler1993}. Radical Participatory Design~\cite{udoewa2022} extends this to challenge foundational hierarchies in research. The \cgen{} framework~\cite{oduniyi2020} applies participatory and evolutionary principles to design collaboration. Our contribution extends \cgen{} from visual design to biomedical applications, where the stakes of governance failures are measured in health outcomes rather than aesthetic preferences.
+
+\subsection{Evolutionary and Collective Intelligence}
+
+Interactive Evolutionary Algorithms (IEAs) combine computational generation with human evaluation~\cite{he2025}. Conversational Swarm Intelligence~\cite{rosenberg2023} enables networked groups to function as collective decision-makers. The \cgen{} framework's voting model is an instance of this pattern, applied to the fitness function of an evolutionary algorithm.
+
+\subsection{Closest Language Designs}
+
+Several existing languages approximate aspects of the \neu{} design:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{F\#}: OCaml lineage with .NET ecosystem reach. Strong type system and data processing, but lacks R's statistical primitives and Rust's ownership model.
+  \item \textbf{Scala}: Functional programming on the JVM with a powerful type system. Ecosystem is strong but complexity is high.
+  \item \textbf{Julia}: Data science performance with multiple dispatch. Closest to \neu{}'s data-first philosophy, but lacks OCaml's module system and Rust's memory safety.
+  \item \textbf{Gleam}: ML-family language targeting Erlang VM and JavaScript. Clean design but early ecosystem.
+\end{itemize}
+
+None of these combine all five pillars: expression orientation, data primitives, algebraic safety, pragmatic FP with effects, and polyglot reach.
+
+\subsection{AI-Assisted Compiler Construction and Self-Hosting}
+
+Recent work at Anthropic~\cite{anthropic2025} demonstrated that a large language model (Claude) could write a self-hosting C compiler---a compiler that compiles its own source code---targeting three instruction set architectures (x86, ARM, RISC-V). The compiler implements lexing, parsing, type checking, optimization, register allocation, and code generation. The system achieves self-hosting on ARM and RISC-V entirely, and on x86 with a single delegation to GCC for 16-bit real-mode code generation where physical size constraints (32KB boot sector limit) make the AI-generated output (60KB+ due to opcode prefix overhead) infeasible.
+
+This work validates two principles central to our architecture. First, \textbf{compilation target constraints are physical, not abstract}: instruction encoding overhead, binary size limits, and hardware fabric constraints are real boundaries that determine where delegation is necessary. Second, \textbf{self-hosting is a completeness test}: a system that can describe and produce itself demonstrates sufficient expressive power. For \neu{}, the analogous milestone is an \aie{} framework that can classify its own pipeline stages---which the microfrontend module system already partially achieves, as each module declares its own engine type.
+
+\subsection{OCaml for Hardware Description}
+
+Hardcaml~\cite{hardcaml2023} demonstrates that OCaml's type system and module functors are effective for hardware description. Jane Street uses Hardcaml in production for FPGA-based trading systems, and the tool has been used to win cryptographic computation competitions (ZPrize). The Eclat project~\cite{eclat2023} extends this further, implementing a synchronous functional language that compiles to hardware and can host an OCaml virtual machine on FPGA. These projects demonstrate that OCaml's reach extends from formal verification to physical hardware---a span that is uniquely relevant to a system like \neu{} that must bridge from spectroscopy hardware to governance UI.
+
+\subsection{Compiler-Driven UI Frameworks}
+
+Svelte~\cite{svelte2019} pioneered the compiler-driven approach to UI frameworks, shifting reactivity resolution from runtime (virtual DOM diffing) to compile time (direct DOM mutation). This philosophy---move work from runtime to build time---is shared with OCaml's approach to type safety and with the broader \neu{} principle that formal properties should be verified before execution, not during it. The combination of Svelte (compile-time UI) with Melange (compile-time types) creates a frontend stack where both correctness and performance are addressed at build time.
+
+% ══════════════════════════════════════════════════════════
+% SECTION 9: CONCLUSION
+% ══════════════════════════════════════════════════════════
+\section{Conclusion}
+\label{sec:conclusion}
+
+We have presented \neu{}, a polyglot architecture that connects computational theory (\aie{}), language design (OCaml--TypeScript--R), and participatory infrastructure (\cgen{}) into a coherent system for equitable biomedical computing.
+
+The key contributions are:
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{A formal connection between information-theoretic process classification and programming language type systems.} \aie{}'s engine taxonomy (synthesis, analysis, transformation) maps to traits and type constraints that can be checked at compile time. This is not merely a naming convention---it enables the compiler to verify that a pipeline stage classified as ``analysis'' actually reduces information content.
+
+  \item \textbf{A concrete polyglot architecture that leverages each language's strengths.} OCaml provides the formal kernel (type safety, module functors, exhaustive validation). TypeScript provides the orchestration hub (async, UI, application logic). R provides the analytical layer (data frames, statistics, visualization). The architecture achieves approximately 80\% of a purpose-built language's guarantees using existing, mature tools.
+
+  \item \textbf{A microfrontend module system where visual interface components are typed computational engines.} Each module declares its \aie{} engine type, language layer, and typed ports. The pipeline composition is visible in the UI, making data flow and provenance legible to both developers and domain participants.
+\end{enumerate}
+
+The application to equitable biomedicine demonstrates that these are not abstract concerns. When communities participate in drug discovery and disease spectroscopy, the formal properties---data sovereignty, provenance tracking, community governance, attribution, compensation---are the difference between participatory research and extractive data practices.
+
+The architecture is implemented and running. The microfrontend pipeline compiles, serves, and demonstrates the full flow from candidate generation through grammar validation, evolutionary co-design, spectral analysis, cohort statistics, and provenance tracking. The OCaml and R layers are currently emulated in TypeScript with the correct type signatures and module boundaries, ready to be replaced with Melange-compiled OCaml and WebR-backed R as those bridges mature.
+
+Future work includes: (1) implementing the OCaml kernel via Melange and measuring the type safety improvement at the boundary, (2) integrating WebR for real statistical computation in the Cohort Analysis module, (3) connecting the provenance system to blockchain-based attribution infrastructure, (4) field-testing the participatory voting model with a real community data cooperative, (5) replacing the Web Component rendering layer with Svelte to leverage compile-time UI optimization, and (6) prototyping Hardcaml-based FPGA acceleration for the spectral preprocessing pipeline, testing whether OCaml's module functors can parameterize hardware modules with the same domain interfaces used in the software pipeline.
+
+The infrastructure should make participation the default, not the exception.
+
+% ══════════════════════════════════════════════════════════
+% BIBLIOGRAPHY
+% ══════════════════════════════════════════════════════════
+\begin{thebibliography}{99}
+
+\bibitem{oduniyi2020}
+E.O.~Oduniyi et al.,
+``cgen.dlang: An evolutionary approach to design collaboration,''
+\textit{AVI 2020: Data4Good Workshop}, 2020.
+
+\bibitem{udoewa2022}
+V.~Udoewa,
+``An introduction to radical participatory design: decolonising participatory design processes,''
+\textit{Design Science}, 2022.
+\newblock \doi{10.1017/dsj.2022.24}
+
+\bibitem{he2025}
+J.~He et al.,
+``Collaborative intelligence in sequential experiments: A human-in-the-loop framework for drug discovery,''
+\textit{Information Systems Research}, 2025.
+\newblock \doi{10.1287/isre.2024.1154}
+
+\bibitem{rosenberg2023}
+L.B.~Rosenberg,
+``Artificial swarm intelligence, a human-in-the-loop approach to A.I.,''
+\textit{AAAI}, 2016/2023.
+\newblock \doi{10.1609/aaai.v30i1.9833}
+
+\bibitem{melange2023}
+Melange Contributors,
+``Melange: OCaml for JavaScript developers,''
+\url{https://melange.re}, 2023.
+
+\bibitem{vouillon2014}
+J.~Vouillon and V.~Balat,
+``From bytecode to JavaScript: the js\_of\_ocaml compiler,''
+\textit{Software: Practice and Experience}, vol.~44, no.~8, pp.~951--972, 2014.
+
+\bibitem{webr2024}
+G.~Sherlock,
+``WebR: R in the browser,''
+\url{https://docs.r-wasm.org/webr/latest/}, 2024.
+
+\bibitem{arrow2022}
+Apache Arrow Contributors,
+``Apache Arrow: A cross-language development platform for in-memory analytics,''
+\url{https://arrow.apache.org}, 2022.
+
+\bibitem{peyton2003}
+S.~Peyton Jones,
+``Wearing the hair shirt: a retrospective on Haskell,''
+Invited talk, POPL 2003.
+
+\bibitem{plotkin2009}
+G.~Plotkin and M.~Pretnar,
+``Handlers of algebraic effects,''
+\textit{ESOP 2009}, LNCS 5502, pp.~80--94, 2009.
+
+\bibitem{leijen2014}
+D.~Leijen,
+``Koka: Programming with row polymorphic effect types,''
+\textit{MSFP 2014}, EPTCS 153, pp.~100--126, 2014.
+
+\bibitem{schuler1993}
+D.~Schuler and A.~Namioka,
+\textit{Participatory Design: Principles and Practices},
+Lawrence Erlbaum Associates, 1993.
+
+\bibitem{swan2012}
+M.~Swan,
+``Health 2050: The realization of personalized medicine through crowdsourcing, the quantified self, and the participatory biocitizen,''
+\textit{Journal of Personalized Medicine}, vol.~2, no.~3, pp.~93--118, 2012.
+
+\bibitem{mccartney2024}
+A.M.~McCartney et al.,
+``Benefit-sharing by design: A call to action for human genomics research,''
+\textit{Annual Review of Genomics and Human Genetics}, 2024.
+\newblock \doi{10.1146/annurev-genom-021623-104241}
+
+\bibitem{carroll2020}
+S.R.~Carroll et al.,
+``The CARE Principles for Indigenous Data Governance,''
+\textit{Data Science Journal}, 2020.
+\newblock \doi{10.5334/dsj-2020-043}
+
+\bibitem{anthropic2025}
+Anthropic Engineering,
+``Building a C compiler in Claude's extended thinking,''
+Anthropic Blog, 2025.
+\newblock \url{https://www.anthropic.com/engineering/building-c-compiler}
+
+\bibitem{hardcaml2023}
+Jane Street,
+``Hardcaml: An OCaml library for designing hardware,''
+\url{https://github.com/janestreet/hardcaml}, 2023.
+
+\bibitem{eclat2023}
+L.~Music and L.~Music,
+``Eclat: A synchronous functional language for programming FPGAs,''
+\textit{ACM SIGPLAN Workshop on Partial Evaluation and Program Manipulation}, 2023.
+
+\bibitem{svelte2019}
+R.~Harris,
+``Svelte 3: Rethinking reactivity,''
+\url{https://svelte.dev/blog/svelte-3-rethinking-reactivity}, 2019.
+
+\bibitem{cover2006}
+T.M.~Cover and J.A.~Thomas,
+\textit{Elements of Information Theory},
+2nd ed., Wiley-Interscience, 2006.
+
+\bibitem{tishby2000}
+N.~Tishby, F.C.~Pereira, and W.~Bialek,
+``The information bottleneck method,''
+\textit{Proc. 37th Annual Allerton Conference on Communication, Control, and Computing}, pp.~368--377, 1999.
+
+\bibitem{shwartzziv2017}
+R.~Shwartz-Ziv and N.~Tishby,
+``Opening the black box of deep neural networks via information,''
+\textit{arXiv:1703.00810}, 2017.
+
+\bibitem{bonchi2014}
+F.~Bonchi, P.~Soboci\'{n}ski, and F.~Zanasi,
+``A categorical semantics of signal flow graphs,''
+\textit{CONCUR 2014}, LNCS 8704, pp.~435--450, 2014.
+\newblock \doi{10.1007/978-3-662-44584-6_30}
+
+\bibitem{fong2019}
+B.~Fong and D.I.~Spivak,
+\textit{An Invitation to Applied Category Theory: Seven Sketches in Compositionality},
+Cambridge University Press, 2019.
+\newblock \doi{10.1017/9781108668804}
+
+\bibitem{foley2021}
+J.~Foley, S.~Breiner, E.~Subrahmanian, and J.~Dusel,
+``Operads for complex system design specification, analysis and synthesis,''
+\textit{Proc. Royal Society A}, vol.~477, no.~2252, 2021.
+\newblock \doi{10.1098/rspa.2021.0099}
+
+\bibitem{yang2024}
+W.~Yang et al.,
+``A mathematical framework of semantic communication based on category theory,''
+\textit{arXiv:2504.11334}, 2025.
+
+\end{thebibliography}
+
+\end{document}

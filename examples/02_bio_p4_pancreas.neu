@@ -1,0 +1,10 @@
+// 02_bio_p4_pancreas.neu
+// Closed-loop endocrine control safety contract compiled to Bio-P4 silicon
+
+contract ArtificialPancreasSafety {
+  rule 1: 0..70, -50..50 -> suppress_dosage "INV_HYPO_BARRIER";
+  rule 2: 71..95, -50..-2 -> set_dosage(5) "INV_RAMP_SUPPRESS";
+  rule 3: 96..130, -2..5 -> set_dosage(10) "INV_BASAL_NORM";
+  rule 4: 131..180, -2..10 -> set_dosage(25) "INV_CORRECTION";
+  rule 5: 181..400, -2..50 -> set_dosage(40) "INV_BOLUS_CEILING";
+}

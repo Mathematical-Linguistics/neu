@@ -1,0 +1,9 @@
+// 01_vectorized_analytics.neu
+// Vectorized statistical operations with R-style syntax and pipe operators
+
+let raw_vitals = [98.6, 99.1, 101.4, 98.4, 102.2];
+
+fn to_celsius(f) = (f - 32.0) * 0.555;
+
+let celsius_vitals = (raw_vitals - 32.0) * 0.555;
+celsius_vitals;

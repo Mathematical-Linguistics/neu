@@ -1,0 +1,44 @@
+lib: [
+  "_build/install/default/lib/neu/META"
+  "_build/install/default/lib/neu/core/ast.ml" {"core/ast.ml"}
+  "_build/install/default/lib/neu/core/eval.ml" {"core/eval.ml"}
+  "_build/install/default/lib/neu/core/lexer.ml" {"core/lexer.ml"}
+  "_build/install/default/lib/neu/core/neu_core.a" {"core/neu_core.a"}
+  "_build/install/default/lib/neu/core/neu_core.cma" {"core/neu_core.cma"}
+  "_build/install/default/lib/neu/core/neu_core.cmi" {"core/neu_core.cmi"}
+  "_build/install/default/lib/neu/core/neu_core.cmt" {"core/neu_core.cmt"}
+  "_build/install/default/lib/neu/core/neu_core.cmx" {"core/neu_core.cmx"}
+  "_build/install/default/lib/neu/core/neu_core.cmxa" {"core/neu_core.cmxa"}
+  "_build/install/default/lib/neu/core/neu_core.ml" {"core/neu_core.ml"}
+  "_build/install/default/lib/neu/core/neu_core__Ast.cmi" {"core/neu_core__Ast.cmi"}
+  "_build/install/default/lib/neu/core/neu_core__Ast.cmt" {"core/neu_core__Ast.cmt"}
+  "_build/install/default/lib/neu/core/neu_core__Ast.cmx" {"core/neu_core__Ast.cmx"}
+  "_build/install/default/lib/neu/core/neu_core__Eval.cmi" {"core/neu_core__Eval.cmi"}
+  "_build/install/default/lib/neu/core/neu_core__Eval.cmt" {"core/neu_core__Eval.cmt"}
+  "_build/install/default/lib/neu/core/neu_core__Eval.cmx" {"core/neu_core__Eval.cmx"}
+  "_build/install/default/lib/neu/core/neu_core__Lexer.cmi" {"core/neu_core__Lexer.cmi"}
+  "_build/install/default/lib/neu/core/neu_core__Lexer.cmt" {"core/neu_core__Lexer.cmt"}
+  "_build/install/default/lib/neu/core/neu_core__Lexer.cmx" {"core/neu_core__Lexer.cmx"}
+  "_build/install/default/lib/neu/core/neu_core__P4_codegen.cmi" {"core/neu_core__P4_codegen.cmi"}
+  "_build/install/default/lib/neu/core/neu_core__P4_codegen.cmt" {"core/neu_core__P4_codegen.cmt"}
+  "_build/install/default/lib/neu/core/neu_core__P4_codegen.cmx" {"core/neu_core__P4_codegen.cmx"}
+  "_build/install/default/lib/neu/core/neu_core__Parser.cmi" {"core/neu_core__Parser.cmi"}
+  "_build/install/default/lib/neu/core/neu_core__Parser.cmt" {"core/neu_core__Parser.cmt"}
+  "_build/install/default/lib/neu/core/neu_core__Parser.cmti" {"core/neu_core__Parser.cmti"}
+  "_build/install/default/lib/neu/core/neu_core__Parser.cmx" {"core/neu_core__Parser.cmx"}
+  "_build/install/default/lib/neu/core/neu_core__Typecheck.cmi" {"core/neu_core__Typecheck.cmi"}
+  "_build/install/default/lib/neu/core/neu_core__Typecheck.cmt" {"core/neu_core__Typecheck.cmt"}
+  "_build/install/default/lib/neu/core/neu_core__Typecheck.cmx" {"core/neu_core__Typecheck.cmx"}
+  "_build/install/default/lib/neu/core/p4_codegen.ml" {"core/p4_codegen.ml"}
+  "_build/install/default/lib/neu/core/parser.ml" {"core/parser.ml"}
+  "_build/install/default/lib/neu/core/parser.mli" {"core/parser.mli"}
+  "_build/install/default/lib/neu/core/typecheck.ml" {"core/typecheck.ml"}
+  "_build/install/default/lib/neu/dune-package"
+  "_build/install/default/lib/neu/opam"
+]
+libexec: [
+  "_build/install/default/lib/neu/core/neu_core.cmxs" {"core/neu_core.cmxs"}
+]
+bin: [
+  "_build/install/default/bin/neu"
+]

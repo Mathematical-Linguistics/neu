@@ -1,0 +1,252 @@
+
+** Conflict (shift/reduce) in state 15.
+** Tokens involved: STAR SLASH
+** The following explanations concentrate on token STAR.
+** This state is reached from program_file after reading:
+
+LET IDENT EQUAL expr IN term_expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program_file 
+list(decl) EOF 
+decl list(decl) 
+expr option(SEMICOLON) 
+pipe_expr 
+logic_expr 
+arith_expr comp_op arith_expr 
+term_expr 
+(?)
+
+** In state 15, looking ahead at STAR, reducing production
+** arith_expr -> term_expr
+** is permitted because of the following sub-derivation:
+
+term_expr STAR atom_expr // lookahead token appears
+atom_expr // lookahead token is inherited
+LET IDENT EQUAL expr IN expr // lookahead token is inherited
+                        pipe_expr // lookahead token is inherited
+                        logic_expr // lookahead token is inherited
+                        arith_expr // lookahead token is inherited
+                        term_expr . 
+
+** In state 15, looking ahead at STAR, shifting is permitted
+** because of the following sub-derivation:
+
+atom_expr 
+LET IDENT EQUAL expr IN expr 
+                        pipe_expr 
+                        logic_expr 
+                        arith_expr comp_op arith_expr 
+                        term_expr 
+                        term_expr . STAR atom_expr 
+
+** Conflict (shift/reduce) in state 20.
+** Token involved: PIPE
+** This state is reached from program_file after reading:
+
+LET IDENT EQUAL expr IN pipe_expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program_file 
+list(decl) EOF 
+decl list(decl) 
+expr option(SEMICOLON) 
+pipe_expr 
+(?)
+
+** In state 20, looking ahead at PIPE, reducing production
+** expr -> pipe_expr
+** is permitted because of the following sub-derivation:
+
+pipe_expr PIPE logic_expr // lookahead token appears
+logic_expr // lookahead token is inherited
+arith_expr // lookahead token is inherited
+term_expr // lookahead token is inherited
+atom_expr // lookahead token is inherited
+LET IDENT EQUAL expr IN expr // lookahead token is inherited
+                        pipe_expr . 
+
+** In state 20, looking ahead at PIPE, shifting is permitted
+** because of the following sub-derivation:
+
+logic_expr 
+arith_expr comp_op arith_expr 
+term_expr 
+atom_expr 
+LET IDENT EQUAL expr IN expr 
+                        pipe_expr 
+                        pipe_expr . PIPE logic_expr 
+
+** Conflict (shift/reduce) in state 24.
+** Tokens involved: PLUS MINUS LESS_EQUAL LESS GREATER_EQUAL GREATER EQUAL_EQUAL
+** The following explanations concentrate on token PLUS.
+** This state is reached from program_file after reading:
+
+LET IDENT EQUAL expr IN arith_expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program_file 
+list(decl) EOF 
+decl list(decl) 
+expr option(SEMICOLON) 
+pipe_expr 
+logic_expr 
+arith_expr comp_op arith_expr 
+(?)
+
+** In state 24, looking ahead at PLUS, shifting is permitted
+** because of the following sub-derivation:
+
+term_expr 
+atom_expr 
+LET IDENT EQUAL expr IN expr 
+                        pipe_expr 
+                        logic_expr 
+                        arith_expr comp_op arith_expr 
+                        arith_expr . PLUS term_expr 
+
+** In state 24, looking ahead at PLUS, reducing production
+** logic_expr -> arith_expr
+** is permitted because of the following sub-derivation:
+
+arith_expr PLUS term_expr // lookahead token appears
+term_expr // lookahead token is inherited
+atom_expr // lookahead token is inherited
+LET IDENT EQUAL expr IN expr // lookahead token is inherited
+                        pipe_expr // lookahead token is inherited
+                        logic_expr // lookahead token is inherited
+                        arith_expr . 
+
+** Conflict (shift/reduce) in state 26.
+** Tokens involved: STAR SLASH
+** The following explanations concentrate on token STAR.
+** This state is reached from program_file after reading:
+
+LET IDENT EQUAL expr IN arith_expr PLUS term_expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program_file 
+list(decl) EOF 
+decl list(decl) 
+expr option(SEMICOLON) 
+pipe_expr 
+logic_expr 
+arith_expr comp_op arith_expr 
+term_expr 
+(?)
+
+** In state 26, looking ahead at STAR, reducing production
+** arith_expr -> arith_expr PLUS term_expr
+** is permitted because of the following sub-derivation:
+
+term_expr STAR atom_expr // lookahead token appears
+atom_expr // lookahead token is inherited
+LET IDENT EQUAL expr IN expr // lookahead token is inherited
+                        pipe_expr // lookahead token is inherited
+                        logic_expr // lookahead token is inherited
+                        arith_expr // lookahead token is inherited
+                        arith_expr PLUS term_expr . 
+
+** In state 26, looking ahead at STAR, shifting is permitted
+** because of the following sub-derivation:
+
+atom_expr 
+LET IDENT EQUAL expr IN expr 
+                        pipe_expr 
+                        logic_expr 
+                        arith_expr comp_op arith_expr 
+                        arith_expr PLUS term_expr 
+                                        term_expr . STAR atom_expr 
+
+** Conflict (shift/reduce) in state 28.
+** Tokens involved: STAR SLASH
+** The following explanations concentrate on token STAR.
+** This state is reached from program_file after reading:
+
+LET IDENT EQUAL expr IN arith_expr MINUS term_expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program_file 
+list(decl) EOF 
+decl list(decl) 
+expr option(SEMICOLON) 
+pipe_expr 
+logic_expr 
+arith_expr comp_op arith_expr 
+term_expr 
+(?)
+
+** In state 28, looking ahead at STAR, reducing production
+** arith_expr -> arith_expr MINUS term_expr
+** is permitted because of the following sub-derivation:
+
+term_expr STAR atom_expr // lookahead token appears
+atom_expr // lookahead token is inherited
+LET IDENT EQUAL expr IN expr // lookahead token is inherited
+                        pipe_expr // lookahead token is inherited
+                        logic_expr // lookahead token is inherited
+                        arith_expr // lookahead token is inherited
+                        arith_expr MINUS term_expr . 
+
+** In state 28, looking ahead at STAR, shifting is permitted
+** because of the following sub-derivation:
+
+atom_expr 
+LET IDENT EQUAL expr IN expr 
+                        pipe_expr 
+                        logic_expr 
+                        arith_expr comp_op arith_expr 
+                        arith_expr MINUS term_expr 
+                                         term_expr . STAR atom_expr 
+
+** Conflict (shift/reduce) in state 35.
+** Tokens involved: PLUS MINUS
+** The following explanations concentrate on token PLUS.
+** This state is reached from program_file after reading:
+
+LET IDENT EQUAL expr IN arith_expr comp_op arith_expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program_file 
+list(decl) EOF 
+decl list(decl) 
+expr option(SEMICOLON) 
+pipe_expr 
+logic_expr 
+arith_expr comp_op arith_expr 
+(?)
+
+** In state 35, looking ahead at PLUS, shifting is permitted
+** because of the following sub-derivation:
+
+term_expr 
+atom_expr 
+LET IDENT EQUAL expr IN expr 
+                        pipe_expr 
+                        logic_expr 
+                        arith_expr comp_op arith_expr 
+                                           arith_expr . PLUS term_expr 
+
+** In state 35, looking ahead at PLUS, reducing production
+** logic_expr -> arith_expr comp_op arith_expr
+** is permitted because of the following sub-derivation:
+
+arith_expr PLUS term_expr // lookahead token appears
+term_expr // lookahead token is inherited
+atom_expr // lookahead token is inherited
+LET IDENT EQUAL expr IN expr // lookahead token is inherited
+                        pipe_expr // lookahead token is inherited
+                        logic_expr // lookahead token is inherited
+                        arith_expr comp_op arith_expr . 

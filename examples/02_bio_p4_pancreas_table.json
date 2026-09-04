@@ -1,0 +1,42 @@
+{
+  "contract": "ArtificialPancreasSafety",
+  "target": "P4-16 V1Model",
+  "table_name": "IngressPipe.triage_table",
+  "rules": [
+    {
+      "priority": 1,
+      "glucose_min": 0, "glucose_max": 70,
+      "delta_min": -50, "delta_max": 50,
+      "target": {"action": "suppress_dosage", "param": 0},
+      "invariant": "INV_HYPO_BARRIER"
+    },
+    {
+      "priority": 2,
+      "glucose_min": 71, "glucose_max": 95,
+      "delta_min": -50, "delta_max": -2,
+      "target": {"action": "set_dosage", "param": 5},
+      "invariant": "INV_RAMP_SUPPRESS"
+    },
+    {
+      "priority": 3,
+      "glucose_min": 96, "glucose_max": 130,
+      "delta_min": -2, "delta_max": 5,
+      "target": {"action": "set_dosage", "param": 10},
+      "invariant": "INV_BASAL_NORM"
+    },
+    {
+      "priority": 4,
+      "glucose_min": 131, "glucose_max": 180,
+      "delta_min": -2, "delta_max": 10,
+      "target": {"action": "set_dosage", "param": 25},
+      "invariant": "INV_CORRECTION"
+    },
+    {
+      "priority": 5,
+      "glucose_min": 181, "glucose_max": 400,
+      "delta_min": -2, "delta_max": 50,
+      "target": {"action": "set_dosage", "param": 40},
+      "invariant": "INV_BOLUS_CEILING"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+(lang dune 3.14)
+(name neu)
+(version 0.1.0)
+(using menhir 3.0)

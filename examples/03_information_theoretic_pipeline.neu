@@ -1,0 +1,8 @@
+// 03_information_theoretic_pipeline.neu
+// aie Entropy annotations: synthesis, analysis, transformation
+
+fn expand_spectrum(x): synthesis = x * 2;
+fn extract_features(spectrum): analysis = spectrum / 4;
+fn fourier_isometry(sig): transformation = sig + 0;
+let signal = [10, 20, 30];
+signal * 3;

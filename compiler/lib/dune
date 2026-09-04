@@ -1,0 +1,10 @@
+(library
+ (name neu_core)
+ (public_name neu.core)
+ (libraries menhirLib)
+ (modules ast lexer parser eval typecheck p4_codegen))
+
+(ocamllex lexer)
+
+(menhir
+ (modules parser))
