@@ -1,141 +1,141 @@
 # Neu
-### The Information-Theoretic Polyglot Language for Living Systems & Bio-P4 Silicon
-**Mathematical Linguistics Group (mL-G)** · *Research & Systems Architecture*
+### A Language for Expressing and Composing Computational Engines
+**Mathematical Linguistics Group (mL-G)**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Compiler](https://img.shields.io/badge/Compiler-OCaml%205.x%20%2B%20Menhir-orange.svg)](compiler/)
 [![Data-Plane](https://img.shields.io/badge/Data--Plane-P4--16%20%2B%20SMT--LIB2-brightgreen.svg)](runtime/p4/)
-[![Treatise](https://img.shields.io/badge/Manuscript-PDF%20(63KB%20Source)-purple.svg)](papers/neu_treatise.pdf)
 
 ---
 
-## 🏛️ Executive Vision
+## Overview
 
-Programming languages traditionally enforce syntactic types (e.g. `String -> Int`), while physical systems require **formal safety bounds, data sovereignty, and information-theoretic predictability**. 
+Neu is an expressive language designed for defining, communicating, and composing **computational engines**. 
 
-**Neu** is a polyglot language engineered by the **Mathematical Linguistics Group (mL-G)** that unites the formal rigor of category theory, the exploratory agility of statistical data science, and the sub-microwatt execution guarantees of programmable biological data planes:
+In software systems—whether processing data, analyzing biosignals, or routing audio—computation rarely fits neatly into isolated, static functions. Instead, we work with continuous processes: engines that generate new material, engines that analyze and summarize, and engines that transform data losslessly from one representation into another. 
 
-1. **Tri-Substrate Polyglot Synthesis**:
-   - **OCaml**: Formal ML kernel, algebraic data types, module functors, and LR(1) grammar verification.
-   - **R**: Tabular dataframes and vectorized operations as language primitives with pipe composition (`|>`).
-   - **TypeScript / WebAssembly**: Ubiquitous web platform orchestration, async/await ergonomics, and provenance tracking.
-   - **Rust**: Opt-in ownership semantics (`own Vec<T>`) for zero-cost performance without garbage-collection pauses.
-   - **Haskell**: Purity by default and algebraic effect tracking.
+While the engine concept is grounded in formal mechanisms (such as information-theoretic bounds and categorical pipelines), Neu is built to make expressing them straightforward and applicable. The language synthesizes practical ideas from several languages:
 
-2. **`aie` Information-Theoretic Type System**:
-   Functions and pipeline stages are statically checked against Shannon entropy bounds:
-   - **Synthesis Engines** ($H(S_n) > H(S_1)$): Generative expansion.
-   - **Analysis Engines** ($H(S_n) < H(S_1)$): Dimensionality reduction, feature extraction, and triage.
-   - **Transformations** ($H(S_n) = H(S_1)$): Lossless isomorphisms and isometric signal representations.
-
-3. **The Bio-P4 Compilation Bridge (`personal-infra`)**:
-   Neu directly bridges high-level clinical contracts with the **Bio-P4 Initiative** ([`personal-infra`](file:///Users/erickoduniyi/Desktop/iig/research/prototypes/personal-infra)):
-   - Expresses physiological safety invariants in declarative syntax.
-   - Compiles contracts into **Quantifier-Free Bit-Vector (QF_BV) SMT-LIB2 queries** verified by the Z3 theorem prover.
-   - Emits verified **P4-16 match-action tables** (`IngressPipe.triage_table`) deployed to sub-100 nW conformable self-powered sensor silicon.
+- **From R**: First-class vectorized arithmetic and tabular data. Vector operations work naturally without boilerplate loops, and data flows cleanly through pipe operators (`|>`).
+- **From OCaml**: Algebraic data types, pattern matching, fast native compilation, and strong compile-time guarantees.
+- **From TypeScript**: Modular orchestration, async workflows, and straightforward integration with web platforms and microfrontends.
+- **From Rust**: Clear ownership semantics for performance-critical paths without global garbage-collection surprises.
 
 ---
 
-## 📐 System Architecture
+## The Engine Concept
 
-```
-                                  HIGH-LEVEL PROGRAM
-                             (contract / vector pipeline)
-                                           │
-                                           ▼
-                            ┌──────────────────────────────┐
-                            │      Neu Native Compiler     │
-                            │   (OCaml 5.x + Menhir 3.0)   │
-                            └──────────────┬───────────────┘
-                                           │
-                    ┌──────────────────────┴──────────────────────┐
-                    ▼                                             ▼
-     ┌─────────────────────────────┐               ┌─────────────────────────────┐
-     │   aie Entropy Typechecker   │               │       Bio-P4 Synthesizer    │
-     │   • Synthesis    (H >)      │               │   • Signal Temporal Logic   │
-     │   • Analysis     (H <)      │               │   • Z3 SMT-LIB2 Generation │
-     │   • Transformation (H =)    │               │   • P4-16 Match-Action Table│
-     └──────────────┬──────────────┘               └──────────────┬──────────────┘
-                    │                                             │
-                    ▼                                             ▼
-     ┌─────────────────────────────┐               ┌─────────────────────────────┐
-     │ Vectorized Execution Engine │               │ Programmable Silicon Target │
-     │   • R-Style Vector Math     │               │   • Sub-100 nW ASIC Data    │
-     │   • Linear Pipelines (|>)   │               │   • 99.9% Baseline Triage   │
-     └─────────────────────────────┘               └─────────────────────────────┘
+Neu provides a straightforward way to tag and reason about what a computational step is doing:
+
+1. **Synthesis Engines**: Processes that expand or generate information (e.g., sound synthesis, generative design, model expansion).
+2. **Analysis Engines**: Processes that compress or extract structure (e.g., sensor triage, feature extraction, diagnostics).
+3. **Transformations**: Processes that convert between formats without losing information (e.g., coordinate transforms, rotations, invertible encodings).
+
+```neu
+// An analysis engine that compresses high-rate sensor streams
+fn on_body_triage(stream): analysis = stream / 4;
+
+// An isometric transform that converts representations losslessly
+fn fourier_rotation(sig): transformation = sig + 0;
+
+// An expansive synthesis step
+fn expand_spectrum(seed): synthesis = seed * 2;
 ```
 
 ---
 
-## ⚡ Quickstart
+## Vectorized Syntax & Pipelines
+
+Neu treats vectors and pipes as language primitives, combining R's exploratory workflow with OCaml's type safety:
+
+```neu
+// Vectorized arithmetic distributes automatically over arrays
+let raw_vitals = [98.6, 99.1, 101.4, 98.4, 102.2];
+
+fn to_celsius(f) = (f - 32.0) * 0.555;
+
+// Pipe values directly into functions
+let celsius = raw_vitals |> to_celsius;
+```
+
+---
+
+## Quickstart
 
 ### Prerequisites
 - OCaml $\ge$ 5.0, Dune $\ge$ 3.14, Menhir $\ge$ 3.0 (`opam install dune menhir`)
-- Python 3.10+ with `z3-solver` (for SMT execution)
+- Python 3.10+ (optional, for running downstream Z3 verification)
 
-### 1. Build and Run Tests
+### 1. Build and Test
 ```bash
 cd compiler
 dune build
 dune runtest
 ```
 
-### 2. Interactive CLI Demonstration
+### 2. Run the Interactive Demo
 ```bash
 dune exec neu -- --demo
 ```
 
-### 3. Run Vectorized Neu Scripts
+### 3. Run a Neu Script
 ```bash
-# Evaluates R-style vectorized Fahrenheit-to-Celsius conversion
 dune exec neu -- run ../examples/01_vectorized_analytics.neu
 ```
 
-### 4. Compile Bio-P4 Clinical Safety Contracts
-```bash
-# Synthesizes Z3 SMT-LIB2 verification assertions and P4-16 table JSON
-dune exec neu -- compile --target=p4 ../examples/02_bio_p4_pancreas.neu
-```
-Outputs:
-- `examples/02_bio_p4_pancreas_safety.smt2`
-- `examples/02_bio_p4_pancreas_table.json`
-
 ---
 
-## 📦 Repository Structure
+## Repository Structure
 
 ```
 neu/
 ├── compiler/
-│   ├── bin/main.ml             # Neu CLI compiler & evaluator driver
+│   ├── bin/main.ml             # CLI driver (run, check, compile)
 │   ├── lib/
-│   │   ├── ast.ml              # AST for expressions, types, contracts & entropy
-│   │   ├── eval.ml             # R-style vectorized interpreter & pipeline engine
+│   │   ├── ast.ml              # AST for expressions, engines, and contracts
+│   │   ├── eval.ml             # Vectorized interpreter and pipe runner
 │   │   ├── lexer.mll           # Lexical tokenizer
-│   │   ├── parser.mly          # Menhir LR(1) grammar specification
-│   │   ├── p4_codegen.ml       # Bio-P4 SMT-LIB2 & P4-16 table generator
-│   │   └── typecheck.ml        # aie Information-theoretic entropy type checker
+│   │   ├── parser.mly          # Menhir LR(1) grammar
+│   │   ├── p4_codegen.ml       # Hardware target generator (SMT-LIB2 / P4-16)
+│   │   └── typecheck.ml        # Engine behavior and entropy checker
 │   ├── test/test_neu.ml        # Automated test suite
-│   └── dune-project            # Dune 3.14 orchestrator
+│   └── dune-project            # Dune project configuration
 ├── examples/
-│   ├── 01_vectorized_analytics.neu        # R-style vector arithmetic
-│   ├── 02_bio_p4_pancreas.neu             # Artificial pancreas safety contract
-│   └── 03_information_theoretic_pipeline.neu # Entropy annotations
+│   ├── 01_vectorized_analytics.neu            # Vector math and pipes
+│   ├── 02_bio_p4_pancreas.neu                 # Closed-loop safety contract
+│   └── 03_information_theoretic_pipeline.neu # Engine annotations
 ├── papers/
-│   ├── neu_development.tex     # Comprehensive single-column development paper
-│   ├── neu_development.pdf     # Compiled publication-ready PDF
-│   └── neu_treatise.tex        # 63KB full academic treatise
+│   ├── neu_development.tex     # Development paper source
+│   ├── neu_development.pdf     # Compiled single-column report
+│   └── neu_treatise.tex        # Reference theoretical paper
 ├── runtime/
-│   ├── p4/                     # Bio-P4 integration assets (bio_synth.ml, bio_synth.py)
-│   └── ts/                     # TypeScript orchestration runtime & provenance
-└── README.md                   # Project overview & roadmap
+│   ├── p4/                     # Bio-P4 target scripts and solver bridges
+│   └── ts/                     # TypeScript runtime modules
+└── README.md
 ```
 
 ---
 
-## 🧬 Collaboration & Lineage
+## Applications
 
-Neu is developed under the **Mathematical Linguistics Group (mL-G)** (`https://github.com/Mathematical-Linguistics-Group-mL-G`), continuing the computational lineage of the **MIT Media Lab** and the **Intelligent Interfaces Group (IIG)**:
-- **`catling`**: Categorical string diagram reduction engine for DisCoCat pregroup grammars.
-- **`disco-station`**: Concurrent spatial acoustic daemon and sheaf consensus router.
-- **`neu`**: The high-level information-theoretic language compiling formal categorical and biological contracts into living systems.
+While Neu is a general-purpose language for composing engines, it is actively applied across two primary domains:
+
+### 1. Programmable Biological Data Planes (Bio-P4)
+In cyber-physical medicine and self-powered wearable sensors (`personal-infra`), controllers cannot rely on unconstrained black-box models. Neu allows safety contracts to be written declaratively and compiled down to hardware match-action tables:
+
+```neu
+contract ArtificialPancreasSafety {
+  rule 1:   0..70, -50..50 -> suppress_dosage "INV_HYPO_BARRIER";
+  rule 2:  71..95, -50..-2 -> set_dosage(5)   "INV_RAMP_SUPPRESS";
+  rule 3: 96..130,  -2..5  -> set_dosage(10)  "INV_BASAL_NORM";
+  rule 4: 131..180, -2..10 -> set_dosage(25)  "INV_CORRECTION";
+  rule 5: 181..400, -2..50 -> set_dosage(40)  "INV_BOLUS_CEILING";
+}
+```
+
+Running `neu compile --target=p4 <file.neu>` produces:
+- A **P4-16 match-action table** (`IngressPipe.triage_table`) deployed to sub-100\,nW silicon, dropping 99.9% of resting baselines on-body.
+- A **Quantifier-Free Bit-Vector (QF_BV) SMT-LIB2 formula** verified by the Z3 solver to ensure safety bounds are never breached.
+
+### 2. Living System Instruments & Mathematical Linguistics
+Within the Mathematical Linguistics Group (mL-G), Neu serves as the high-level language linking categorical grammars (`catling`) with spatial acoustic installations (`disco-station`), allowing formal syntactic structures and audio engines to be expressed within a single pipeline.
