@@ -1,0 +1,55 @@
+\contentsline {section}{\numberline {1}Introduction}{3}{section.1}%
+\contentsline {section}{\numberline {2}Mathematical Foundations}{4}{section.2}%
+\contentsline {subsection}{\numberline {2.1}The Data Processing Inequality and Engine Classification}{4}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}The Information Bottleneck and Pipeline Design}{4}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Categorical Semantics of Signal Flow}{5}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Applied Category Theory: Compositionality and Open Systems}{5}{subsection.2.4}%
+\contentsline {subsection}{\numberline {2.5}Semantic Entropy and Communication}{6}{subsection.2.5}%
+\contentsline {subsection}{\numberline {2.6}Summary of Mathematical Connections}{6}{subsection.2.6}%
+\contentsline {section}{\numberline {3}AI Expressions: A Theoretical Framework}{6}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Engines}{6}{subsection.3.1}%
+\contentsline {subsubsection}{\numberline {3.1.1}Synthesis Engines}{7}{subsubsection.3.1.1}%
+\contentsline {subsubsection}{\numberline {3.1.2}Analysis Engines}{7}{subsubsection.3.1.2}%
+\contentsline {subsubsection}{\numberline {3.1.3}Transformations}{7}{subsubsection.3.1.3}%
+\contentsline {subsection}{\numberline {3.2}Functions and Operations}{7}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Applications}{7}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Environments}{8}{subsection.3.4}%
+\contentsline {subsection}{\numberline {3.5}Expressions}{8}{subsection.3.5}%
+\contentsline {section}{\numberline {4}The Neu Language Design}{8}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Type System}{8}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Data as a Primitive}{9}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Effect System}{9}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}Module System}{10}{subsection.4.4}%
+\contentsline {section}{\numberline {5}The Polyglot Architecture: OCaml--TypeScript--R}{10}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Design Decision: TypeScript in the Middle}{10}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}OCaml to TypeScript via Melange}{11}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}TypeScript to R via Arrow and WebR}{11}{subsection.5.3}%
+\contentsline {subsection}{\numberline {5.4}What Each Language Handles}{11}{subsection.5.4}%
+\contentsline {subsection}{\numberline {5.5}OCaml's Compilation Reach: From FPGA to Browser}{12}{subsection.5.5}%
+\contentsline {subsection}{\numberline {5.6}Svelte as the Rendering Layer}{12}{subsection.5.6}%
+\contentsline {subsection}{\numberline {5.7}The Delegation Principle}{13}{subsection.5.7}%
+\contentsline {section}{\numberline {6}cgen-dlang: Participatory Evolutionary Co-Design}{13}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Core Abstractions}{14}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}cgen-dlang as an AIE Application}{14}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}Domain Parameterization}{14}{subsection.6.3}%
+\contentsline {subsection}{\numberline {6.4}Provenance as Infrastructure}{15}{subsection.6.4}%
+\contentsline {section}{\numberline {7}Microfrontend Module System}{15}{section.7}%
+\contentsline {subsection}{\numberline {7.1}Module Architecture}{15}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}Pipeline Composition}{15}{subsection.7.2}%
+\contentsline {subsection}{\numberline {7.3}Implemented Modules}{16}{subsection.7.3}%
+\contentsline {subsection}{\numberline {7.4}Visual Design}{16}{subsection.7.4}%
+\contentsline {section}{\numberline {8}Application: Equitable Biomedicine}{16}{section.8}%
+\contentsline {subsection}{\numberline {8.1}The Detection Pipeline}{16}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}Extending cgen-dlang to Drug Discovery}{17}{subsection.8.2}%
+\contentsline {subsection}{\numberline {8.3}Governance Principles}{17}{subsection.8.3}%
+\contentsline {subsection}{\numberline {8.4}The Full Stack}{17}{subsection.8.4}%
+\contentsline {section}{\numberline {9}Related Work}{18}{section.9}%
+\contentsline {subsection}{\numberline {9.1}Polyglot and Multi-Language Systems}{18}{subsection.9.1}%
+\contentsline {subsection}{\numberline {9.2}Effect Systems and Typed Side Effects}{18}{subsection.9.2}%
+\contentsline {subsection}{\numberline {9.3}Participatory Design in Computing}{18}{subsection.9.3}%
+\contentsline {subsection}{\numberline {9.4}Evolutionary and Collective Intelligence}{18}{subsection.9.4}%
+\contentsline {subsection}{\numberline {9.5}Closest Language Designs}{19}{subsection.9.5}%
+\contentsline {subsection}{\numberline {9.6}AI-Assisted Compiler Construction and Self-Hosting}{19}{subsection.9.6}%
+\contentsline {subsection}{\numberline {9.7}OCaml for Hardware Description}{19}{subsection.9.7}%
+\contentsline {subsection}{\numberline {9.8}Compiler-Driven UI Frameworks}{20}{subsection.9.8}%
+\contentsline {section}{\numberline {10}Conclusion}{20}{section.10}%
