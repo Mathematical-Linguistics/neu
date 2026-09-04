@@ -1,6 +1,6 @@
 # Neu
 ### A Language for Expressing and Composing Computational Engines
-**Mathematical Linguistics Group (mL-G)**
+**Mathematical Linguistics (mlG)**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Compiler](https://img.shields.io/badge/Compiler-OCaml%205.x%20%2B%20Menhir-orange.svg)](compiler/)
@@ -138,4 +138,4 @@ Running `neu compile --target=p4 <file.neu>` produces:
 - A **Quantifier-Free Bit-Vector (QF_BV) SMT-LIB2 formula** verified by the Z3 solver to ensure safety bounds are never breached.
 
 ### 2. Living System Instruments & Mathematical Linguistics
-Within the Mathematical Linguistics Group (mL-G), Neu serves as the high-level language linking categorical grammars (`catling`) with spatial acoustic installations (`disco-station`), allowing formal syntactic structures and audio engines to be expressed within a single pipeline.
+Within the Mathematical Linguistics (mlG), Neu serves as the high-level language linking categorical grammars (`catling`) with spatial acoustic installations (`disco-station`), allowing formal syntactic structures and audio engines to be expressed within a single pipeline.
