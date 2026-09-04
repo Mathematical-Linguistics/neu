@@ -1,0 +1,14 @@
+_build/
+*.install
+*.cmo
+*.cmi
+*.cmx
+*.o
+*.a
+*.cma
+*.cmxa
+*.cmxs
+*.aux
+*.log
+*.out
+.DS_Store
