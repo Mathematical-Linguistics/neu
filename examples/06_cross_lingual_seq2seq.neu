@@ -1,0 +1,49 @@
+// 06_cross_lingual_seq2seq.neu
+// Topological Sequence-to-Sequence Modeling & Cross-Lingual Manifold Routing in Neu
+// Mathematical Linguistics Group (mlG)
+
+// ============================================================================
+// 1. English to Yoruba: Word-Order Inversion & Tonal Tier Fibration
+// ============================================================================
+// In English, the determiner precedes the noun ("The elder").
+// In Yoruba, the noun precedes the determiner ("Àgbàlagbà náà"),
+// and continuous verbs split into pre-verbal progressive particle ("ń") + verbal root ("jẹ").
+
+let en_train = ["The", "elder", "eats", "yam"];
+let yo_target = ["Àgbàlagbà", "náà", "ń", "jẹ", "iṣu"];
+
+// Representation Routing: A* pathfinding selects optimal linguistic route:
+// split { root, tone, aspect } -> cast(Yoruba)
+let en_yo_engine = en_train -> learn(target: yo_target, target_lang: "Yoruba");
+en_yo_engine;
+
+// Real-time Inference on Unseen Test Sentences:
+let test_child = ["The", "child", "drinks", "water"];
+let yo_child_trans = test_child -> en_yo_engine;
+yo_child_trans;
+
+let test_greet = ["Good", "morning"];
+let yo_greet_trans = test_greet -> en_yo_engine;
+yo_greet_trans;
+
+// ============================================================================
+// 2. English to Japanese: SVO to SOV Head-Final Argument Shift
+// ============================================================================
+// English: Subject ("The elder") + Verb ("eats") + Object ("yam")
+// Japanese: Subject ("Rōjin wa") + Object ("yamuimo o") + Verb ("taberu")
+// Routing selects: cover(w=2, s=1) -> shift(1) -> cast(Japanese)
+
+let ja_target = ["Rōjin", "wa", "yamuimo", "o", "taberu"];
+let en_ja_engine = en_train -> learn(target: ja_target, target_lang: "Japanese");
+en_ja_engine;
+
+let ja_child_trans = test_child -> en_ja_engine;
+ja_child_trans;
+
+// ============================================================================
+// 3. Thermodynamic Landauer Dissipation & Complexity Profiling
+// ============================================================================
+// Verifies that the deployed model meets strict edge energy harvesting budgets
+// for microcontrollers (e.g. Raspberry Pi Pico / ARM Cortex-M)
+let translation_cost = en_yo_engine -> complex;
+translation_cost;

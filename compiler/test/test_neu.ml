@@ -211,6 +211,29 @@ let test_complex_certification () =
   assert (contains_substr cert_str "Time O(N)");
   print_endline "[PASS] test_complex_certification"
 
+let test_seq2seq_translation () =
+  let code = "
+let english = [\"The\", \"elder\", \"eats\", \"yam\"];
+let yoruba_target = [\"Àgbàlagbà\", \"náà\", \"ń\", \"jẹ\", \"iṣu\"];
+let translator = english -> learn(target: yoruba_target, target_lang: \"Yoruba\");
+let translated = [\"The\", \"child\", \"drinks\", \"water\"] -> translator;
+let model_cost = translator -> complex;
+" in
+  let lexbuf = Lexing.from_string code in
+  let prog = Parser.program_file Lexer.read lexbuf in
+  let results = Eval.eval_program prog in
+  assert (List.length results = 5);
+  let tr_model = List.nth results 2 in
+  let tr_output = List.nth results 3 in
+  let tr_cost = List.nth results 4 in
+  assert (contains_substr tr_model "split { root, tone, aspect } -> cast(Yoruba)");
+  assert (contains_substr tr_output "Ọmọ");
+  assert (contains_substr tr_output "náà");
+  assert (contains_substr tr_output "mu");
+  assert (contains_substr tr_output "omi");
+  assert (contains_substr tr_cost "VERIFIED_BOUNDED");
+  print_endline "[PASS] test_seq2seq_translation"
+
 let () =
   print_endline "=== Running Neu Test Suite ===";
   test_scalar_math ();
@@ -230,4 +253,5 @@ let () =
   test_epiplexity_certification ();
   test_complex_measurement ();
   test_complex_certification ();
+  test_seq2seq_translation ();
   print_endline "All tests passed successfully!"
