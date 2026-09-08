@@ -106,6 +106,68 @@ let model_cost = trained_filter -> complex;
   print_endline "  --- Hardware P4-16 Match-Action Table JSON ---";
   print_endline (P4_codegen.emit_p4_json contract)
 
+let run_bench as_json =
+  if not as_json then begin
+    print_banner ();
+    print_endline "\n=================================================================";
+    print_endline "  Neu Micro-Benchmark Suite: Topological Morphisms & Invariants  ";
+    print_endline "=================================================================";
+    Printf.printf "%-22s %-8s %-15s %-15s\n" "Verb / Morphism" "N" "Latency (us)" "Throughput (kS/s)";
+    print_endline "-----------------------------------------------------------------"
+  end;
+
+  let scales = [64; 256; 1024; 4096; 16384] in
+  let iters = 50 in
+  let json_records = ref [] in
+
+  List.iter (fun n ->
+    let raw_floats = List.init n (fun i -> 100.0 +. 10.0 *. sin (float_of_int i *. 0.1)) in
+    let v_data = Eval.VVec (List.map (fun f -> Eval.VFloat f) raw_floats) in
+    let label_floats = List.init (n / 2) (fun i -> if i mod 2 = 0 then 1.0 else 0.0) in
+    let v_labels = Eval.VVec (List.map (fun f -> Eval.VFloat f) label_floats) in
+    let env = [
+      ("data", v_data);
+      ("labels", v_labels);
+      ("spectral", Eval.VString "spectral");
+      ("low_pass", Eval.VClosure (["x"], BinOp ("*", Ident "x", Float 0.5), []));
+      ("high_pass", Eval.VClosure (["x"], BinOp ("*", Ident "x", Float 1.5), []));
+    ] in
+
+    let bench_expr name expr =
+      (* Warmup *)
+      for _ = 1 to 3 do
+        ignore (Eval.eval env expr)
+      done;
+      let t0 = Unix.gettimeofday () in
+      for _ = 1 to iters do
+        ignore (Eval.eval env expr)
+      done;
+      let t1 = Unix.gettimeofday () in
+      let total_sec = t1 -. t0 in
+      let mean_us = (total_sec /. float_of_int iters) *. 1_000_000.0 in
+      let throughput = (float_of_int n /. (total_sec /. float_of_int iters)) /. 1000.0 in
+      if not as_json then
+        Printf.printf "%-22s %-8d %-15.2f %-15.2f\n" name n mean_us throughput;
+      json_records := Printf.sprintf "{\"name\": \"%s\", \"n\": %d, \"latency_us\": %.2f, \"throughput_ks\": %.2f}" name n mean_us throughput :: !json_records
+    in
+
+    bench_expr "shift(1)" (Flow (Ident "data", Shift (Int 1)));
+    bench_expr "cover(8, 4)" (Flow (Ident "data", Cover (Int 8, Int 4)));
+    bench_expr "decompose(spectral)" (Flow (Ident "data", Decompose (Ident "spectral")));
+    bench_expr "split{low,high}" (Flow (Ident "data", Split [Ident "low_pass"; Ident "high_pass"]));
+    bench_expr "plex(budget:200)" (Flow (Ident "data", Epiplexity [("budget", Float 200.0)]));
+    bench_expr "complex" (Flow (Ident "data", Complex []));
+    if n <= 4096 then
+      bench_expr "learn(routing+sgd)" (Flow (Ident "data", Learn [("target", Ident "labels"); ("max_entropy", Float 1.5)]));
+    if not as_json then print_endline "-----------------------------------------------------------------"
+  ) scales;
+
+  if as_json then begin
+    print_endline "{\"benchmarks\": [";
+    print_endline (String.concat ",\n" (List.rev !json_records));
+    print_endline "]}"
+  end
+
 let parse_and_eval_file path =
   let ic = open_in path in
   let len = in_channel_length ic in
@@ -143,11 +205,14 @@ let () =
   let args = Array.to_list Sys.argv in
   match args with
   | _ :: "--demo" :: _ -> run_demo ()
+  | _ :: "bench" :: "--json" :: _ -> run_bench true
+  | _ :: "bench" :: _ -> run_bench false
   | _ :: "run" :: file :: _ -> parse_and_eval_file file
   | _ :: "compile" :: "--target=p4" :: file :: _ -> parse_and_compile_p4 file
   | _ ->
       print_banner ();
       print_endline "Usage:";
       print_endline "  neu --demo";
+      print_endline "  neu bench [--json]";
       print_endline "  neu run <file.neu>";
       print_endline "  neu compile --target=p4 <file.neu>"

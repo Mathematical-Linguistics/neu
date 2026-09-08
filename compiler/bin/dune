@@ -1,4 +1,4 @@
 (executable
  (public_name neu)
  (name main)
- (libraries neu_core))
+ (libraries neu_core unix))

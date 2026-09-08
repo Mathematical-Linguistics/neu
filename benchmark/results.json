@@ -1,0 +1,314 @@
+{
+  "metadata": {
+    "timestamp": "2026-09-08T14:29:23Z",
+    "pytorch_version": "2.7.0",
+    "scales": [
+      64,
+      256,
+      1024,
+      4096,
+      16384
+    ]
+  },
+  "neu_primitives": [
+    {
+      "name": "shift(1)",
+      "n": 64,
+      "latency_us": 0.8,
+      "throughput_ks": 79891.5
+    },
+    {
+      "name": "cover(8, 4)",
+      "n": 64,
+      "latency_us": 2.26,
+      "throughput_ks": 28315.98
+    },
+    {
+      "name": "decompose(spectral)",
+      "n": 64,
+      "latency_us": 0.06,
+      "throughput_ks": 1032444.06
+    },
+    {
+      "name": "split{low,high}",
+      "n": 64,
+      "latency_us": 2.5,
+      "throughput_ks": 25565.28
+    },
+    {
+      "name": "plex(budget:200)",
+      "n": 64,
+      "latency_us": 24.74,
+      "throughput_ks": 2586.58
+    },
+    {
+      "name": "complex",
+      "n": 64,
+      "latency_us": 2.18,
+      "throughput_ks": 29369.31
+    },
+    {
+      "name": "learn(routing+sgd)",
+      "n": 64,
+      "latency_us": 12.7,
+      "throughput_ks": 5038.2
+    },
+    {
+      "name": "shift(1)",
+      "n": 256,
+      "latency_us": 1.32,
+      "throughput_ks": 193816.21
+    },
+    {
+      "name": "cover(8, 4)",
+      "n": 256,
+      "latency_us": 4.18,
+      "throughput_ks": 61286.63
+    },
+    {
+      "name": "decompose(spectral)",
+      "n": 256,
+      "latency_us": 0.06,
+      "throughput_ks": 4473924.27
+    },
+    {
+      "name": "split{low,high}",
+      "n": 256,
+      "latency_us": 4.14,
+      "throughput_ks": 61851.49
+    },
+    {
+      "name": "plex(budget:200)",
+      "n": 256,
+      "latency_us": 50.54,
+      "throughput_ks": 5065.3
+    },
+    {
+      "name": "complex",
+      "n": 256,
+      "latency_us": 7.7,
+      "throughput_ks": 33242.78
+    },
+    {
+      "name": "learn(routing+sgd)",
+      "n": 256,
+      "latency_us": 44.72,
+      "throughput_ks": 5724.79
+    },
+    {
+      "name": "shift(1)",
+      "n": 1024,
+      "latency_us": 6.72,
+      "throughput_ks": 152411.9
+    },
+    {
+      "name": "cover(8, 4)",
+      "n": 1024,
+      "latency_us": 20.48,
+      "throughput_ks": 49999.62
+    },
+    {
+      "name": "decompose(spectral)",
+      "n": 1024,
+      "latency_us": 0.06,
+      "throughput_ks": 17895697.07
+    },
+    {
+      "name": "split{low,high}",
+      "n": 1024,
+      "latency_us": 18.96,
+      "throughput_ks": 54011.16
+    },
+    {
+      "name": "plex(budget:200)",
+      "n": 1024,
+      "latency_us": 277.94,
+      "throughput_ks": 3684.26
+    },
+    {
+      "name": "complex",
+      "n": 1024,
+      "latency_us": 50.94,
+      "throughput_ks": 20101.88
+    },
+    {
+      "name": "learn(routing+sgd)",
+      "n": 1024,
+      "latency_us": 159.42,
+      "throughput_ks": 6423.25
+    },
+    {
+      "name": "shift(1)",
+      "n": 4096,
+      "latency_us": 28.76,
+      "throughput_ks": 142406.08
+    },
+    {
+      "name": "cover(8, 4)",
+      "n": 4096,
+      "latency_us": 100.82,
+      "throughput_ks": 40625.87
+    },
+    {
+      "name": "decompose(spectral)",
+      "n": 4096,
+      "latency_us": 0.06,
+      "throughput_ks": 66076419.94
+    },
+    {
+      "name": "split{low,high}",
+      "n": 4096,
+      "latency_us": 141.36,
+      "throughput_ks": 28976.0
+    },
+    {
+      "name": "plex(budget:200)",
+      "n": 4096,
+      "latency_us": 1128.96,
+      "throughput_ks": 3628.12
+    },
+    {
+      "name": "complex",
+      "n": 4096,
+      "latency_us": 287.24,
+      "throughput_ks": 14259.76
+    },
+    {
+      "name": "learn(routing+sgd)",
+      "n": 4096,
+      "latency_us": 802.72,
+      "throughput_ks": 5102.67
+    },
+    {
+      "name": "shift(1)",
+      "n": 16384,
+      "latency_us": 264.28,
+      "throughput_ks": 61994.33
+    },
+    {
+      "name": "cover(8, 4)",
+      "n": 16384,
+      "latency_us": 840.32,
+      "throughput_ks": 19497.32
+    },
+    {
+      "name": "decompose(spectral)",
+      "n": 16384,
+      "latency_us": 0.04,
+      "throughput_ks": 429496729.6
+    },
+    {
+      "name": "split{low,high}",
+      "n": 16384,
+      "latency_us": 3269.12,
+      "throughput_ks": 5011.75
+    },
+    {
+      "name": "plex(budget:200)",
+      "n": 16384,
+      "latency_us": 8087.08,
+      "throughput_ks": 2025.95
+    },
+    {
+      "name": "complex",
+      "n": 16384,
+      "latency_us": 3252.02,
+      "throughput_ks": 5038.1
+    }
+  ],
+  "pytorch_pipeline": [
+    {
+      "framework": "PyTorch 2.7",
+      "n": 64,
+      "latency_mean_us": 33.187586814165115,
+      "latency_std_us": 3.6900523223588486,
+      "throughput_ks": 1928.4318669618826,
+      "peak_memory_kb": 1.9404296875
+    },
+    {
+      "framework": "PyTorch 2.7",
+      "n": 256,
+      "latency_mean_us": 32.46534615755081,
+      "latency_std_us": 2.520378475817692,
+      "throughput_ks": 7885.330985157518,
+      "peak_memory_kb": 1.998046875
+    },
+    {
+      "framework": "PyTorch 2.7",
+      "n": 1024,
+      "latency_mean_us": 36.42626106739044,
+      "latency_std_us": 0.24559626714691823,
+      "throughput_ks": 28111.586805616633,
+      "peak_memory_kb": 1.9404296875
+    },
+    {
+      "framework": "PyTorch 2.7",
+      "n": 4096,
+      "latency_mean_us": 72.00685019294421,
+      "latency_std_us": 12.043866707711581,
+      "throughput_ks": 56883.476905664706,
+      "peak_memory_kb": 1.9404296875
+    },
+    {
+      "framework": "PyTorch 2.7",
+      "n": 16384,
+      "latency_mean_us": 190.579021970431,
+      "latency_std_us": 29.299572705268627,
+      "throughput_ks": 85969.58799873595,
+      "peak_memory_kb": 1.9404296875
+    }
+  ],
+  "routing_vs_nas": {
+    "neu_routing_time_ms": 0.005499459803104401,
+    "neu_eval_states": 4,
+    "neu_best_route": "decompose",
+    "neu_discovered_k": 1.8,
+    "pytorch_nas_time_ms": 1086.2965835258365,
+    "pytorch_eval_states": 4,
+    "pytorch_best_idx": 1,
+    "pytorch_params": 29,
+    "speedup": 197527.8704487722
+  },
+  "profiling_overhead": [
+    {
+      "n": 64,
+      "shift_us": 0.8,
+      "plex_us": 24.74,
+      "complex_us": 2.18,
+      "plex_ratio": 30.924999999999997,
+      "complex_ratio": 2.725
+    },
+    {
+      "n": 256,
+      "shift_us": 1.32,
+      "plex_us": 50.54,
+      "complex_us": 7.7,
+      "plex_ratio": 38.28787878787879,
+      "complex_ratio": 5.833333333333333
+    },
+    {
+      "n": 1024,
+      "shift_us": 6.72,
+      "plex_us": 277.94,
+      "complex_us": 50.94,
+      "plex_ratio": 41.36011904761905,
+      "complex_ratio": 7.580357142857143
+    },
+    {
+      "n": 4096,
+      "shift_us": 28.76,
+      "plex_us": 1128.96,
+      "complex_us": 287.24,
+      "plex_ratio": 39.254520166898466,
+      "complex_ratio": 9.987482614742698
+    },
+    {
+      "n": 16384,
+      "shift_us": 264.28,
+      "plex_us": 8087.08,
+      "complex_us": 3252.02,
+      "plex_ratio": 30.600423792946877,
+      "complex_ratio": 12.305206599061602
+    }
+  ]
+}

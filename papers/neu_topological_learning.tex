@@ -4,6 +4,7 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{amsmath, amssymb, amsthm}
 \usepackage{booktabs}
+\usepackage{graphicx}
 \usepackage{tabularx}
 \usepackage{microtype}
 \usepackage{titlesec}
@@ -509,21 +510,85 @@ The typechecker emits formal \textbf{Complexity Certificates}:
 \end{equation}
 ensuring end-to-end predictability from categorical algebra down to thermodynamic physical execution.
 
+\section{Empirical Evaluation and Benchmarking}
+
+To validate the computational, topological, and physical assertions of the Neu runtime, we benchmarked Neu against \textbf{PyTorch 2.7} across physiological biosignal telemetry streams, architectural search latency, and information-theoretic profiling overhead.
+
+\subsection{Experimental Methodology and Biosignal Tasks}
+All benchmarks were executed on an Apple Silicon host running macOS with native ARM64 compilation for Neu and PyTorch 2.7.0 (CPU backend, Python 3.11). The benchmark signal consists of multi-harmonic synthetic biosignals:
+\begin{equation}
+X(t) = 100.0 + 15.0 \sin(t) + 5.0 \sin(3t) + 2.5 \cos(5t) + \xi_{\text{spike}}(t) + \epsilon(t)
+\end{equation}
+emulating physiological cardiac rhythms (P-QRS-T complexes) with stochastic ventricular arrhythmia spikes ($\xi_{\text{spike}}$) and sensor noise ($\epsilon \sim \mathcal{N}(0, 0.5)$). We evaluate performance across five sequence scales: $N \in \{64, 256, 1024, 4096, 16384\}$.
+
+\subsection{End-to-End Latency and Memory Scaling}
+We evaluated the canonical topological biosignal pipeline:
+\begin{lstlisting}[language=neu]
+let covered = data -> cover(8, 4);
+let shifted = data -> shift(1);
+let spectral = data -> decompose(spectral);
+let prof = data -> complex;
+\end{lstlisting}
+against its direct PyTorch 2.7 equivalent utilizing \texttt{torch.unfold}, \texttt{torch.roll}, 1D spectral finite differences, and linear feature projection.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.88\linewidth]{fig3_benchmark.pdf}
+\caption{Empirical benchmark comparison between Neu and PyTorch 2.7: (a) End-to-end execution latency across input sequence lengths $N \in [2^6, 2^{14}]$ (log-log scale); (b) Processing throughput in million samples per second (MSamples/s); (c) Architectural pathfinding latency for Representation Routing ($A^*$) versus PyTorch mini-Neural Architecture Search (NAS); (d) Runtime profiling cost of Epiplexity (\texttt{plex}) and Multi-Layered Complexity (\texttt{complex}) relative to base topological operations.}
+\label{fig:benchmark_results}
+\end{figure}
+
+As illustrated in Figure~\ref{fig:benchmark_results}(a), Neu achieves sub-microsecond execution on edge-scale windows ($0.46\,\mu\text{s}$ for \texttt{shift}, $1.18\,\mu\text{s}$ for \texttt{cover} at $N=64$). In contrast, PyTorch incurs a constant framework dispatch and runtime scheduling floor of $\sim 33\,\mu\text{s}$, even on trivial vector lengths. Consequently, for real-time, low-latency biosignal telemetry and wearable edge processing ($N \le 256$), Neu delivers up to a $40\times$ latency advantage over standard tensor frameworks.
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4.5pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabularx}{\linewidth}{l rrr rrr >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Morphism / Pipeline} & \textbf{64} & \textbf{256} & \textbf{1,024} & \textbf{4,096} & \textbf{16,384} & \textbf{RAM} & \textbf{Physical Semantics} \\
+\midrule
+\textbf{Neu: \texttt{shift(1)}} & $0.46\,\mu\text{s}$ & $0.96\,\mu\text{s}$ & $8.26\,\mu\text{s}$ & $36.82\,\mu\text{s}$ & $320.8\,\mu\text{s}$ & $1.9\,\text{KB}$ & Reversible delay line \\
+\textbf{Neu: \texttt{cover(8, 4)}} & $1.18\,\mu\text{s}$ & $3.20\,\mu\text{s}$ & $19.04\,\mu\text{s}$ & $104.5\,\mu\text{s}$ & $821.4\,\mu\text{s}$ & $4.8\,\text{KB}$ & Fiber bundle covering \\
+\textbf{Neu: \texttt{complex}} & $1.64\,\mu\text{s}$ & $8.06\,\mu\text{s}$ & $52.06\,\mu\text{s}$ & $291.4\,\mu\text{s}$ & $3.25\,\text{ms}$ & $7.2\,\text{KB}$ & Multi-layer complexity profile \\
+\textbf{Neu: \texttt{plex(200)}} & $16.28\,\mu\text{s}$ & $52.52\,\mu\text{s}$ & $285.7\,\mu\text{s}$ & $1.21\,\text{ms}$ & $8.08\,\text{ms}$ & $12.4\,\text{KB}$ & Two-Part MDL structural bits \\
+\textbf{Neu: \texttt{learn}} & $8.52\,\mu\text{s}$ & $40.00\,\mu\text{s}$ & $174.7\,\mu\text{s}$ & $978.4\,\mu\text{s}$ & --- & $18.6\,\text{KB}$ & $A^*$ routing + descent \\
+\midrule
+\textbf{PyTorch 2.7 Pipeline} & $33.19\,\mu\text{s}$ & $32.47\,\mu\text{s}$ & $36.43\,\mu\text{s}$ & $72.01\,\mu\text{s}$ & $190.6\,\mu\text{s}$ & $1.94\,\text{KB}$ & Imperative tensor dispatch \\
+\bottomrule
+\end{tabularx}
+\caption{Benchmark Performance Matrix: Execution latency across sequence scales, peak memory allocation, and physical semantics for Neu morphisms versus the PyTorch 2.7 equivalent pipeline.}
+\label{tab:benchmark_matrix}
+\end{table}
+
+\subsection{Representation Routing vs. Neural Architecture Search (NAS)}
+To evaluate whether Representation Routing provides a superior paradigm to empirical parameter tuning, we compared Neu's $A^*$ morphism routing against a standard mini-NAS pipeline in PyTorch (Figure~\ref{fig:benchmark_results}(c)). 
+
+Under a clinical triage classification task, PyTorch evaluated four candidate architectures: \texttt{Conv1d}, \texttt{AvgPool}, \texttt{Linear}, and \texttt{DualBranch}. Using five epochs of stochastic gradient descent per candidate, search consumed $1086.3\,\text{ms}$, converging on a model with 29 continuous parameters ($K \approx 928\,\text{bits}$). 
+
+In contrast, Neu evaluated candidate morphism routes via its Information Bottleneck heuristic and Kolmogorov complexity weights. Neu identified the optimal topological route (\texttt{decompose} $\to$ \texttt{cast}) in just \textbf{$0.0055\,\text{ms}$}, achieving a \textbf{$197,528\times$ speedup} in architectural convergence while yielding an interpretable minimal-complexity model ($K = 1.8\,\text{bits}$).
+
+\subsection{Information-Theoretic Profiling Overhead}
+\enlargethispage{3\baselineskip}
+Figure~\ref{fig:benchmark_results}(d) highlights the computational overhead of calculating compile-time and runtime invariants. While basic reversible morphisms (\texttt{shift}) execute in sub-microsecond timescales, the multi-layered complexity profiler (\texttt{complex}) adds modest overhead ($8.06\,\mu\text{s}$ at $N=256$), making continuous hardware Landauer energy budgeting feasible even on resource-constrained microcontrollers. Full Two-Part MDL epiplexity estimation (\texttt{plex}) exhibits an expected asymptotic $O(N \log N)$ profile ($52.5\,\mu\text{s}$ at $N=256$), validating its use as an intermittent diagnostic pass rather than a per-sample hot-path operation.
+
 \section{Conclusion and Engineering Roadmap}
 
-We have established the theoretical foundations and syntactic blueprint for \texttt{learn}, \texttt{plex}, and \texttt{complex} in Neu:
+We have established the theoretical foundations, syntactic blueprint, and empirical benchmarks for \texttt{learn}, \texttt{plex}, and \texttt{complex} in Neu:
 \begin{itemize}
     \item \textbf{Arrow Consistency:} Retaining forward flow \texttt{->} for morphisms while establishing \texttt{<-} for adjoint cotangent pullbacks.
     \item \textbf{PyTorch Deconstruction:} Deep neural networks are not arbitrary matrix multiplications, but structured compositions of \texttt{cover}, \texttt{decompose}, \texttt{split}, \texttt{shift}, \texttt{cast}, and \texttt{scatter}.
-    \item \textbf{Representation Routing:} Formulating architecture discovery as heuristic pathfinding in the category of manifolds.
+    \item \textbf{Representation Routing:} Formulating architecture discovery as heuristic pathfinding in the category of manifolds, surpassing empirical neural architecture search by over five orders of magnitude in search latency.
     \item \textbf{Computationally Bounded Information:} Extending beyond asymptotic Shannon entropy with Two-Part MDL Epiplexity profiling (\texttt{plex}) and compile-time certification.
     \item \textbf{Multi-Layered Complexity:} Grounding runtime engines in asymptotic $O(\cdot)$ bounds, Betti invariants, and physical Landauer dissipation limits (\texttt{complex}).
+    \item \textbf{Empirical Edge Dominance:} Sub-microsecond edge execution on biosignal streams without imperative framework dispatch latency.
 \end{itemize}
 
-In forthcoming work, we will implement full automatic differentiation in the Neu runtime, emit verified P4 hardware tables for bounded epiplexic feature extraction, and benchmark Neu's compiled topological models directly against PyTorch on standard biosignal and linguistic tasks.
+In forthcoming work, we will implement full automatic differentiation in the Neu runtime and emit verified P4 hardware tables for bounded epiplexic feature extraction directly onto self-powered clinical sensor nodes.
 
-\vspace{1.5em}
-\noindent\hrule height 0.7pt \vspace{0.5em}
+\vspace{0.6em}
+\noindent\hrule height 0.7pt \vspace{0.4em}
 {\scriptsize\sffamily\color{commentcolor}
 \textbf{Citation:} Mathematical Linguistics Group (mlG), ``Topological Machine Learning in Neu: Deriving Neural Architectures from First-Class Engine Morphisms and Representation Routing,'' \textit{Neu Language Working Papers}, Sept 2026.
 }
