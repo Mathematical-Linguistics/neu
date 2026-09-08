@@ -14,7 +14,7 @@ open Ast
 let print_banner () =
   print_endline "=================================================================";
   print_endline "  Neu: Engine Expression Language (mlG)                         ";
-  print_endline "  Morphisms (->) · Split · Scatter · Decompose · Cover · Shift · Learn";
+  print_endline "  Morphisms (->) · Split · Scatter · Decompose · Cover · Shift · Learn · Epiplexity";
   print_endline "================================================================="
 
 let run_demo () =
@@ -51,7 +51,18 @@ let pred = [60.0, 70.0] -> model;
   let l_results = Eval.eval_program l_prog in
   List.iter (fun s -> print_endline ("  " ^ s)) l_results;
 
-  print_endline "\n[4] Engine Trajectory Validation (synthesis, analysis, isometry):";
+  print_endline "\n[4] Epiplexity & Structural Information Extraction (epiplexity):";
+  let epi_code = "
+let bio_stream = [12.0, 14.5, 18.2, 22.0, 27.1, 33.0, 39.8, 48.0];
+let profile = bio_stream -> epiplexity(budget: 150);
+" in
+  let e_prog = Parser.program_file Lexer.read (Lexing.from_string epi_code) in
+  let e_results = Eval.eval_program e_prog in
+  List.iter (fun s -> print_endline ("  " ^ s)) e_results;
+  let epi_cert = Typecheck.check_epiplexity_cert "bio_stream" 150.0 4.2 0.85 in
+  print_endline ("  Certificate: " ^ Typecheck.string_of_epiplexity_cert epi_cert);
+
+  print_endline "\n[5] Engine Trajectory Validation (synthesis, analysis, isometry):";
   let cert_synth = Typecheck.check_entropy_trajectory "generative_expander" Synthesis 12.0 48.0 in
   let cert_analysis = Typecheck.check_entropy_trajectory "on_body_triage" Analysis 128.0 4.0 in
   let cert_iso = Typecheck.check_entropy_trajectory "fourier_transform" Transformation 64.0 64.0 in
@@ -59,7 +70,7 @@ let pred = [60.0, 70.0] -> model;
   print_endline ("  " ^ Typecheck.string_of_cert cert_analysis);
   print_endline ("  " ^ Typecheck.string_of_cert cert_iso);
 
-  print_endline "\n[5] Bio-P4 Clinical Safety Contract Synthesis:";
+  print_endline "\n[6] Bio-P4 Clinical Safety Contract Synthesis:";
   let default_rules = [
     { priority = 1; glucose_range = (0, 70); delta_range = (-50, 50); action = SuppressDosage; invariant_id = "INV_HYPO_BARRIER" };
     { priority = 2; glucose_range = (71, 95); delta_range = (-50, -2); action = SetDosage 5; invariant_id = "INV_RAMP_SUPPRESS" };

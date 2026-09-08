@@ -160,6 +160,28 @@ let out = doubler([10.0, 20.0]);
   assert (List.mem out_res ["[20.00, 40.00]"; "let out = [20.00, 40.00]"]);
   print_endline "[PASS] test_learn_model_call"
 
+let test_epiplexity_measurement () =
+  let code = "
+let wave = [10.0, 20.0, 30.0, 40.0, 50.0, 60.0];
+let metrics = wave -> epiplexity(budget: 100);
+" in
+  let lexbuf = Lexing.from_string code in
+  let prog = Parser.program_file Lexer.read lexbuf in
+  let results = Eval.eval_program prog in
+  assert (List.length results = 2);
+  let res_str = List.nth results 1 in
+  assert (contains_substr res_str "epiplexity_s_t");
+  assert (contains_substr res_str "STRUCTURAL");
+  print_endline "[PASS] test_epiplexity_measurement"
+
+let test_epiplexity_certification () =
+  let cert = Typecheck.check_epiplexity_cert "sensor_telemetry" 100.0 2.45 0.25 in
+  assert (cert.status = "VERIFIED_STRUCTURAL");
+  assert (cert.structure_ratio > 0.90);
+  let cert_str = Typecheck.string_of_epiplexity_cert cert in
+  assert (contains_substr cert_str "VERIFIED_STRUCTURAL");
+  print_endline "[PASS] test_epiplexity_certification"
+
 let () =
   print_endline "=== Running Neu Test Suite ===";
   test_scalar_math ();
@@ -175,4 +197,6 @@ let () =
   test_learn_tier2_routing ();
   test_learn_cover_routing ();
   test_learn_model_call ();
+  test_epiplexity_measurement ();
+  test_epiplexity_certification ();
   print_endline "All tests passed successfully!"

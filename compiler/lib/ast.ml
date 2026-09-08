@@ -52,6 +52,7 @@ type expr =
   | Shift of expr                          (** Displace / offset: shift(delta) *)
   | Cast of string                         (** Functorial cast: cast(Type) *)
   | Learn of (string * expr) list          (** Topological learning & routing: learn(...) *)
+  | Epiplexity of (string * expr) list     (** Epiplexity analysis: epiplexity(...) *)
   | If of expr * expr * expr
   | Lambda of string list * expr
   | Call of expr * expr list

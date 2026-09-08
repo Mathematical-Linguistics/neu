@@ -311,6 +311,51 @@ let execute_learn (_env : env) (data_val : value) (params : (string * value) lis
     predict = predict_func;
   }
 
+let compute_epiplexity (data_val : value) (params : (string * value) list) : value =
+  let xs = float_list_of_val data_val in
+  let n = float_of_int (List.length xs) in
+  let budget =
+    match List.assoc_opt "budget" params with
+    | Some (VFloat f) -> f
+    | Some (VInt i) -> float_of_int i
+    | _ -> 50.0
+  in
+  if n = 0.0 then
+    VRecord [
+      ("epiplexity_s_t", VFloat 0.0);
+      ("residual_entropy_h_t", VFloat 0.0);
+      ("structure_ratio", VFloat 0.0);
+      ("status", VString "EMPTY");
+    ]
+  else
+    let mean = List.fold_left (+.) 0.0 xs /. n in
+    let variance = List.fold_left (fun acc x -> acc +. ((x -. mean) ** 2.0)) 0.0 xs /. n in
+    let init_entropy = if variance > 1e-9 then 0.5 *. (log (2.0 *. Float.pi *. Float.exp 1.0 *. variance) /. log 2.0) else 0.0 in
+
+    let m = execute_learn [] data_val params in
+    match m with
+    | VModel payload ->
+        let s_t = payload.complexity *. (log (budget +. 1.0) /. log 10.0) in
+        let h_t = if payload.loss > 1e-9 then 0.5 *. (log (2.0 *. Float.pi *. Float.exp 1.0 *. payload.loss) /. log 2.0) else 0.05 in
+        let h_t = max 0.0 h_t in
+        let total = s_t +. h_t in
+        let ratio = if total > 1e-9 then s_t /. total else 0.0 in
+        let status = if ratio >= 0.50 then "STRUCTURAL" else "TIME_BOUNDED_NOISE" in
+        VRecord [
+          ("epiplexity_s_t", VFloat s_t);
+          ("residual_entropy_h_t", VFloat h_t);
+          ("structure_ratio", VFloat ratio);
+          ("optimal_route", VString payload.optimal_path);
+          ("status", VString status);
+        ]
+    | _ ->
+        VRecord [
+          ("epiplexity_s_t", VFloat 0.0);
+          ("residual_entropy_h_t", VFloat init_entropy);
+          ("structure_ratio", VFloat 0.0);
+          ("status", VString "TIME_BOUNDED_NOISE");
+        ]
+
 let rec eval (env : env) (e : expr) : value =
   match e with
   | Int i -> VInt i
@@ -357,6 +402,12 @@ let rec eval (env : env) (e : expr) : value =
   | Learn params ->
       let eval_params = List.map (fun (k, ex) -> (k, eval env ex)) params in
       VTagged ("learn", VRecord eval_params)
+  | Epiplexity [("objective", data_expr)] ->
+      let data_val = eval env data_expr in
+      compute_epiplexity data_val []
+  | Epiplexity params ->
+      let eval_params = List.map (fun (k, ex) -> (k, eval env ex)) params in
+      VTagged ("epiplexity", VRecord eval_params)
 
   | If (cond, e1, e2) ->
       (match eval env cond with
@@ -434,7 +485,12 @@ and apply_flow (env : env) (e1 : expr) (e2 : expr) : value =
       let eval_params = List.map (fun (k, ex) -> (k, eval env ex)) params in
       execute_learn env v1 eval_params
 
-  (* 8. General function, model, or closure flow: data -> fn / model *)
+  (* 8. Epiplexity flow: data -> epiplexity(...) *)
+  | Epiplexity params ->
+      let eval_params = List.map (fun (k, ex) -> (k, eval env ex)) params in
+      compute_epiplexity v1 eval_params
+
+  (* 9. General function, model, or closure flow: data -> fn / model *)
   | _ ->
       let fn_val = eval env e2 in
       (match fn_val with
@@ -442,6 +498,8 @@ and apply_flow (env : env) (e1 : expr) (e2 : expr) : value =
            m.predict v1
        | VTagged ("learn", VRecord params) ->
            execute_learn env v1 params
+       | VTagged ("epiplexity", VRecord params) ->
+           compute_epiplexity v1 params
        | VClosure ([param], body, closure_env) ->
            eval ((param, v1) :: closure_env) body
        | VClosure (param :: rest, body, closure_env) ->

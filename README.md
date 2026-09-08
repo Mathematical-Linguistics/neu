@@ -54,6 +54,8 @@ Instead of traditional single-tube pipelines, Neu models computation as continuo
 - **`cast`**: Functorial re-interpretation into another manifold or protocol frame.
 - **`scatter`**: Distributing arrays across spatial channels or hardware lanes.
 - **`decompose`**: Unpacking compound signals into constituent bases.
+- **`learn`**: Morphic pathfinding ($A^*$ in representation space) and continuous parameter fitting.
+- **`epiplexity`**: Computationally bounded information extraction under budget $T$, separating learnable structure $S_T$ from residual entropy $H_T$.
 
 ```neu
 let wave = [10, 20, 30, 40, 50];
@@ -71,6 +73,15 @@ let bands = 100 -> split { high_pass, low_pass }; // [200, 50]
 
 // Cast: functorial reinterpretation
 let packet = wave -> cast(BioTelemetry);     // BioTelemetry([10, 20, 30, 40, 50])
+
+// Learn: representation routing and continuous parameter optimization
+let targets = [2.0, 4.0, 6.0, 8.0, 10.0];
+let filter = wave -> learn(target: targets, max_entropy: 1.2);
+let prediction = [60, 70] -> filter;         // [12.00, 14.00]
+
+// Epiplexity: profile learnable structure vs. time-bounded residual entropy
+let profile = wave -> epiplexity(budget: 150);
+// Evaluates to: {epiplexity_s_t: 1.09, residual_entropy_h_t: 0.05, structure_ratio: 0.96, status: "STRUCTURAL"}
 
 // Vectorized arithmetic distributes automatically over arrays
 let raw_vitals = [98.6, 99.1, 101.4, 98.4, 102.2];

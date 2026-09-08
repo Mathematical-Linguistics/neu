@@ -40,6 +40,7 @@ rule read = parse
   | "shift"           { SHIFT }
   | "cast"            { CAST }
   | "learn"           { LEARN }
+  | "epiplexity"      { EPIPLEXITY }
 
   (* Operators *)
   | "|>"            { PIPE }
