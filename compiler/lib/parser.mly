@@ -9,7 +9,7 @@
 
 %token LET IN IF THEN ELSE FN
 %token CONTRACT RULE SET_DOSAGE SUPPRESS_DOSAGE
-%token SPLIT SCATTER DECOMPOSE COVER SHIFT CAST LEARN EPIPLEXITY
+%token SPLIT SCATTER DECOMPOSE COVER SHIFT CAST LEARN EPIPLEXITY COMPLEX
 %token PLUS MINUS STAR SLASH
 %token EQUAL_EQUAL LESS_EQUAL GREATER_EQUAL LESS GREATER
 %token PIPE ARROW EQUAL
@@ -138,6 +138,9 @@ atom_expr:
   | EPIPLEXITY; LPAREN; params = separated_list(COMMA, learn_param); RPAREN { Epiplexity params }
   | EPIPLEXITY; LBRACE; params = separated_list(COMMA, record_field); RBRACE { Epiplexity params }
   | EPIPLEXITY { Epiplexity [] }
+  | COMPLEX; LPAREN; params = separated_list(COMMA, learn_param); RPAREN { Complex params }
+  | COMPLEX; LBRACE; params = separated_list(COMMA, record_field); RBRACE { Complex params }
+  | COMPLEX { Complex [] }
   | LET; id = IDENT; EQUAL; e1 = expr; IN; e2 = expr { Let (id, e1, e2) }
   | IF; c = expr; THEN; e1 = expr; ELSE; e2 = expr { If (c, e1, e2) }
   | LPAREN; e = expr; RPAREN { e }

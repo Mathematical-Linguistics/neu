@@ -182,6 +182,35 @@ let test_epiplexity_certification () =
   assert (contains_substr cert_str "VERIFIED_STRUCTURAL");
   print_endline "[PASS] test_epiplexity_certification"
 
+let test_complex_measurement () =
+  let code = "
+let stream = [10.0, 20.0, 30.0, 40.0, 50.0];
+let data_cost = stream -> complex;
+let m = stream -> learn(target: [1.0, 2.0, 3.0, 4.0, 5.0]);
+let model_cost = m -> complex;
+" in
+  let lexbuf = Lexing.from_string code in
+  let prog = Parser.program_file Lexer.read lexbuf in
+  let results = Eval.eval_program prog in
+  assert (List.length results = 4);
+  let data_res = List.nth results 1 in
+  let model_res = List.nth results 3 in
+  assert (contains_substr data_res "asymptotic_time");
+  assert (contains_substr data_res "landauer_dissipation_pj");
+  assert (contains_substr data_res "betti_0");
+  assert (contains_substr model_res "asymptotic_time");
+  assert (contains_substr model_res "kolmogorov_bits");
+  print_endline "[PASS] test_complex_measurement"
+
+let test_complex_certification () =
+  let cert = Typecheck.check_complexity_cert "qrs_filter" "O(N)" "O(1)" 14.5 0.035 [1; 0] in
+  assert (cert.status = "VERIFIED_THERMODYNAMICALLY_FEASIBLE");
+  assert (cert.euler_characteristic = 1);
+  let cert_str = Typecheck.string_of_complexity_cert cert in
+  assert (contains_substr cert_str "VERIFIED_THERMODYNAMICALLY_FEASIBLE");
+  assert (contains_substr cert_str "Time O(N)");
+  print_endline "[PASS] test_complex_certification"
+
 let () =
   print_endline "=== Running Neu Test Suite ===";
   test_scalar_math ();
@@ -199,4 +228,6 @@ let () =
   test_learn_model_call ();
   test_epiplexity_measurement ();
   test_epiplexity_certification ();
+  test_complex_measurement ();
+  test_complex_certification ();
   print_endline "All tests passed successfully!"

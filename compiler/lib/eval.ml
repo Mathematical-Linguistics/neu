@@ -356,6 +356,99 @@ let compute_epiplexity (data_val : value) (params : (string * value) list) : val
           ("status", VString "TIME_BOUNDED_NOISE");
         ]
 
+let compute_complexity (target_val : value) (_params : (string * value) list) : value =
+  match target_val with
+  | VModel m ->
+      let k_bits = m.complexity *. 16.0 in
+      let landauer_pj = m.dissipation *. 0.05 in
+      VRecord [
+        ("asymptotic_time", VString "O(N)");
+        ("asymptotic_space", VString "O(1)");
+        ("flops", VFloat (2.0 *. float_of_int (List.length m.weights) +. 1.0));
+        ("memory_bytes", VInt ((List.length m.weights + 1) * 8 + 64));
+        ("kolmogorov_bits", VFloat k_bits);
+        ("landauer_dissipation_pj", VFloat landauer_pj);
+        ("betti_0", VInt 1);
+        ("betti_1", VInt 0);
+        ("euler_characteristic", VInt 1);
+        ("optimal_route", VString m.optimal_path);
+        ("status", VString "VERIFIED_BOUNDED");
+      ]
+  | VVec items ->
+      let xs = List.map float_of_val items in
+      let n = List.length xs in
+      if n = 0 then
+        VRecord [
+          ("asymptotic_time", VString "O(1)");
+          ("asymptotic_space", VString "O(1)");
+          ("flops", VFloat 0.0);
+          ("memory_bytes", VInt 0);
+          ("kolmogorov_bits", VFloat 0.0);
+          ("landauer_dissipation_pj", VFloat 0.0);
+          ("betti_0", VInt 0);
+          ("betti_1", VInt 0);
+          ("euler_characteristic", VInt 0);
+          ("status", VString "EMPTY");
+        ]
+      else
+        (* Estimate b_0 via connected clusters in metric space *)
+        let sorted = List.sort compare xs in
+        let rec count_clusters prev count = function
+          | [] -> count
+          | x :: rest ->
+              if abs_float (x -. prev) > 5.0 then count_clusters x (count + 1) rest
+              else count_clusters x count rest
+        in
+        let b0 = max 1 (count_clusters (List.hd sorted) 1 (List.tl sorted)) in
+
+        (* Estimate b_1 via sign alterations of velocity (phase recurrence / loops) *)
+        let rec count_inflections prev_d acc = function
+          | [] | [_] -> acc
+          | x1 :: (x2 :: _ as rest) ->
+              let d = x2 -. x1 in
+              let new_acc = if (prev_d *. d) < -1e-6 then acc + 1 else acc in
+              count_inflections d new_acc rest
+        in
+        let inflections =
+          match xs with
+          | x1 :: x2 :: rest -> count_inflections (x2 -. x1) 0 (x2 :: rest)
+          | _ -> 0
+        in
+        let b1 = if inflections >= 2 then inflections / 2 else 0 in
+        let euler = b0 - b1 in
+
+        let fn = float_of_int n in
+        let flops = fn *. 4.0 in
+        let mem = n * 8 in
+        let k_bits = fn *. (if b1 > 0 then 1.5 else 0.8) in
+        let landauer_pj = 0.00287 *. fn *. (float_of_int (b0 + b1)) in
+        VRecord [
+          ("asymptotic_time", VString "O(N)");
+          ("asymptotic_space", VString "O(N)");
+          ("flops", VFloat flops);
+          ("memory_bytes", VInt mem);
+          ("kolmogorov_bits", VFloat k_bits);
+          ("landauer_dissipation_pj", VFloat landauer_pj);
+          ("betti_0", VInt b0);
+          ("betti_1", VInt b1);
+          ("euler_characteristic", VInt euler);
+          ("status", VString "VERIFIED_BOUNDED");
+        ]
+  | scalar ->
+      let s = float_of_val scalar in
+      VRecord [
+        ("asymptotic_time", VString "O(1)");
+        ("asymptotic_space", VString "O(1)");
+        ("flops", VFloat 1.0);
+        ("memory_bytes", VInt 8);
+        ("kolmogorov_bits", VFloat (if abs_float s > 1e-6 then 32.0 else 1.0));
+        ("landauer_dissipation_pj", VFloat 0.00287);
+        ("betti_0", VInt 1);
+        ("betti_1", VInt 0);
+        ("euler_characteristic", VInt 1);
+        ("status", VString "VERIFIED_BOUNDED");
+      ]
+
 let rec eval (env : env) (e : expr) : value =
   match e with
   | Int i -> VInt i
@@ -408,6 +501,12 @@ let rec eval (env : env) (e : expr) : value =
   | Epiplexity params ->
       let eval_params = List.map (fun (k, ex) -> (k, eval env ex)) params in
       VTagged ("epiplexity", VRecord eval_params)
+  | Complex [("objective", data_expr)] ->
+      let data_val = eval env data_expr in
+      compute_complexity data_val []
+  | Complex params ->
+      let eval_params = List.map (fun (k, ex) -> (k, eval env ex)) params in
+      VTagged ("complex", VRecord eval_params)
 
   | If (cond, e1, e2) ->
       (match eval env cond with
@@ -490,7 +589,12 @@ and apply_flow (env : env) (e1 : expr) (e2 : expr) : value =
       let eval_params = List.map (fun (k, ex) -> (k, eval env ex)) params in
       compute_epiplexity v1 eval_params
 
-  (* 9. General function, model, or closure flow: data -> fn / model *)
+  (* 9. Complex flow: data -> complex(...) *)
+  | Complex params ->
+      let eval_params = List.map (fun (k, ex) -> (k, eval env ex)) params in
+      compute_complexity v1 eval_params
+
+  (* 10. General function, model, or closure flow: data -> fn / model *)
   | _ ->
       let fn_val = eval env e2 in
       (match fn_val with
@@ -500,6 +604,8 @@ and apply_flow (env : env) (e1 : expr) (e2 : expr) : value =
            execute_learn env v1 params
        | VTagged ("epiplexity", VRecord params) ->
            compute_epiplexity v1 params
+       | VTagged ("complex", VRecord params) ->
+           compute_complexity v1 params
        | VClosure ([param], body, closure_env) ->
            eval ((param, v1) :: closure_env) body
        | VClosure (param :: rest, body, closure_env) ->

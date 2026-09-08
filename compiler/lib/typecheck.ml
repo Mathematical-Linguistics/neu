@@ -63,3 +63,36 @@ let check_epiplexity_cert (name : string) (budget : float) (s_t : float) (h_t : 
 let string_of_epiplexity_cert (cert : epiplexity_cert) : string =
   Printf.sprintf "[epiplexity Check] %s (Budget T: %.0f): S_T = %.2f bits, H_T = %.2f bits (Ratio: %.1f%%) -> %s"
     cert.stream_name cert.budget_t cert.s_t cert.h_t (cert.structure_ratio *. 100.0) cert.status
+
+type complexity_cert = {
+  name : string;
+  asymptotic_time : string;
+  asymptotic_space : string;
+  kolmogorov_bits : float;
+  landauer_dissipation_pj : float;
+  betti_numbers : int list;
+  euler_characteristic : int;
+  status : string;
+}
+
+let check_complexity_cert (name : string) (time_str : string) (space_str : string) (k_bits : float) (landauer_pj : float) (betti : int list) : complexity_cert =
+  let b0 = match betti with [] -> 1 | x :: _ -> x in
+  let b1 = match betti with _ :: y :: _ -> y | _ -> 0 in
+  let euler = b0 - b1 in
+  let status = if landauer_pj < 100.0 then "VERIFIED_THERMODYNAMICALLY_FEASIBLE" else "HIGH_DISSIPATION_WARNING" in
+  {
+    name;
+    asymptotic_time = time_str;
+    asymptotic_space = space_str;
+    kolmogorov_bits = k_bits;
+    landauer_dissipation_pj = landauer_pj;
+    betti_numbers = betti;
+    euler_characteristic = euler;
+    status;
+  }
+
+let string_of_complexity_cert (cert : complexity_cert) : string =
+  let betti_str = String.concat ", " (List.map string_of_int cert.betti_numbers) in
+  Printf.sprintf "[complex Check] %s: Time %s, Space %s | K(pi): %.1f bits | Landauer: %.3f pJ | Betti: [%s] (chi: %d) -> %s"
+    cert.name cert.asymptotic_time cert.asymptotic_space cert.kolmogorov_bits cert.landauer_dissipation_pj betti_str cert.euler_characteristic cert.status
+

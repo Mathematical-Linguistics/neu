@@ -53,6 +53,7 @@ type expr =
   | Cast of string                         (** Functorial cast: cast(Type) *)
   | Learn of (string * expr) list          (** Topological learning & routing: learn(...) *)
   | Epiplexity of (string * expr) list     (** Epiplexity analysis: epiplexity(...) *)
+  | Complex of (string * expr) list        (** Multi-layered complexity profiling: complex(...) *)
   | If of expr * expr * expr
   | Lambda of string list * expr
   | Call of expr * expr list

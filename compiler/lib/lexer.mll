@@ -41,6 +41,8 @@ rule read = parse
   | "cast"            { CAST }
   | "learn"           { LEARN }
   | "epiplexity"      { EPIPLEXITY }
+  | "plex"            { EPIPLEXITY }
+  | "complex"         { COMPLEX }
 
   (* Operators *)
   | "|>"            { PIPE }
