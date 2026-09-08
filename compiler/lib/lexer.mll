@@ -39,6 +39,7 @@ rule read = parse
   | "cover"           { COVER }
   | "shift"           { SHIFT }
   | "cast"            { CAST }
+  | "learn"           { LEARN }
 
   (* Operators *)
   | "|>"            { PIPE }

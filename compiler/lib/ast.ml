@@ -51,6 +51,7 @@ type expr =
   | Cover of expr * expr                   (** Topological cover: cover(window, step) *)
   | Shift of expr                          (** Displace / offset: shift(delta) *)
   | Cast of string                         (** Functorial cast: cast(Type) *)
+  | Learn of (string * expr) list          (** Topological learning & routing: learn(...) *)
   | If of expr * expr * expr
   | Lambda of string list * expr
   | Call of expr * expr list

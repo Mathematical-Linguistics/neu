@@ -14,7 +14,7 @@ open Ast
 let print_banner () =
   print_endline "=================================================================";
   print_endline "  Neu: Engine Expression Language (mlG)                         ";
-  print_endline "  Morphisms (->) · Split · Scatter · Decompose · Cover · Shift   ";
+  print_endline "  Morphisms (->) · Split · Scatter · Decompose · Cover · Shift · Learn";
   print_endline "================================================================="
 
 let run_demo () =
@@ -40,7 +40,18 @@ let run_demo () =
     Printf.printf "  %-38s %s -> %s\n" desc src (Eval.string_of_val res);
   ) demo_lines;
 
-  print_endline "\n[3] Engine Trajectory Validation (synthesis, analysis, isometry):";
+  print_endline "\n[3] Topological Learning & Representation Routing (learn):";
+  let learn_code = "
+let stream = [10.0, 20.0, 30.0, 40.0, 50.0];
+let labels = [1.0, 2.0, 3.0, 4.0, 5.0];
+let model = stream -> learn(target: labels, max_entropy: 1.2);
+let pred = [60.0, 70.0] -> model;
+" in
+  let l_prog = Parser.program_file Lexer.read (Lexing.from_string learn_code) in
+  let l_results = Eval.eval_program l_prog in
+  List.iter (fun s -> print_endline ("  " ^ s)) l_results;
+
+  print_endline "\n[4] Engine Trajectory Validation (synthesis, analysis, isometry):";
   let cert_synth = Typecheck.check_entropy_trajectory "generative_expander" Synthesis 12.0 48.0 in
   let cert_analysis = Typecheck.check_entropy_trajectory "on_body_triage" Analysis 128.0 4.0 in
   let cert_iso = Typecheck.check_entropy_trajectory "fourier_transform" Transformation 64.0 64.0 in
@@ -48,7 +59,7 @@ let run_demo () =
   print_endline ("  " ^ Typecheck.string_of_cert cert_analysis);
   print_endline ("  " ^ Typecheck.string_of_cert cert_iso);
 
-  print_endline "\n[4] Bio-P4 Clinical Safety Contract Synthesis:";
+  print_endline "\n[5] Bio-P4 Clinical Safety Contract Synthesis:";
   let default_rules = [
     { priority = 1; glucose_range = (0, 70); delta_range = (-50, 50); action = SuppressDosage; invariant_id = "INV_HYPO_BARRIER" };
     { priority = 2; glucose_range = (71, 95); delta_range = (-50, -2); action = SetDosage 5; invariant_id = "INV_RAMP_SUPPRESS" };

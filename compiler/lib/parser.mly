@@ -9,7 +9,7 @@
 
 %token LET IN IF THEN ELSE FN
 %token CONTRACT RULE SET_DOSAGE SUPPRESS_DOSAGE
-%token SPLIT SCATTER DECOMPOSE COVER SHIFT CAST
+%token SPLIT SCATTER DECOMPOSE COVER SHIFT CAST LEARN
 %token PLUS MINUS STAR SLASH
 %token EQUAL_EQUAL LESS_EQUAL GREATER_EQUAL LESS GREATER
 %token PIPE ARROW EQUAL
@@ -122,6 +122,7 @@ atom_expr:
   | f = FLOAT  { Float f }
   | b = BOOL   { Bool b }
   | s = STRING { String s }
+  | id = IDENT; LPAREN; args = separated_list(COMMA, expr); RPAREN { Call (Ident id, args) }
   | id = IDENT { Ident id }
   | LBRACKET; items = separated_list(COMMA, expr); RBRACKET { Vec items }
   | LBRACE; fields = separated_list(COMMA, record_field); RBRACE { Record fields }
@@ -132,9 +133,15 @@ atom_expr:
   | COVER; LPAREN; w = expr; COMMA; s = expr; RPAREN { Cover (w, s) }
   | SHIFT; LPAREN; d = expr; RPAREN { Shift d }
   | CAST; LPAREN; t = IDENT; RPAREN { Cast t }
+  | LEARN; LPAREN; params = separated_list(COMMA, learn_param); RPAREN { Learn params }
+  | LEARN; LBRACE; params = separated_list(COMMA, record_field); RBRACE { Learn params }
   | LET; id = IDENT; EQUAL; e1 = expr; IN; e2 = expr { Let (id, e1, e2) }
   | IF; c = expr; THEN; e1 = expr; ELSE; e2 = expr { If (c, e1, e2) }
   | LPAREN; e = expr; RPAREN { e }
+
+learn_param:
+  | key = IDENT; COLON; value = expr { (key, value) }
+  | value = expr                     { ("objective", value) }
 
 record_field:
   | key = IDENT; COLON; value = expr { (key, value) }

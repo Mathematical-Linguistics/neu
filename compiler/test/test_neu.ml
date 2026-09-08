@@ -89,6 +89,77 @@ contract ArtificialPancreas {
    | _ -> failwith "Expected contract decl");
   print_endline "[PASS] test_contract_generation"
 
+let test_learn_syntax () =
+  let code = "
+let l1 = learn(target: [1, 2, 3], max_entropy: 1.2);
+let l2 = learn(target_labels);
+let l3 = learn { loss: \"mse\", budget: 50 };
+" in
+  let lexbuf = Lexing.from_string code in
+  let prog = Parser.program_file Lexer.read lexbuf in
+  assert (List.length prog = 3);
+  print_endline "[PASS] test_learn_syntax"
+
+let contains_substr s sub =
+  let len_s = String.length s and len_sub = String.length sub in
+  if len_sub > len_s then false
+  else
+    let rec loop i =
+      if i + len_sub > len_s then false
+      else if String.sub s i len_sub = sub then true
+      else loop (i + 1)
+    in
+    loop 0
+
+let test_learn_tier2_routing () =
+  let code = "
+let stream = [10.0, 20.0, 30.0, 40.0];
+let labels = [1.0, 2.0, 3.0, 4.0];
+let model = stream -> learn(target: labels, max_entropy: 1.2);
+let pred = [50.0, 60.0] -> model;
+" in
+  let lexbuf = Lexing.from_string code in
+  let prog = Parser.program_file Lexer.read lexbuf in
+  let results = Eval.eval_program prog in
+  assert (List.length results = 4);
+  (* Check that model converged with low cost *)
+  let model_res = List.nth results 2 in
+  assert (contains_substr model_res "model NeuClassifier");
+  (* Check that prediction produced expected output *)
+  let pred_res = List.nth results 3 in
+  assert (List.mem pred_res ["[5.00, 6.00]"; "let pred = [5.00, 6.00]"]);
+  print_endline "[PASS] test_learn_tier2_routing"
+
+let test_learn_cover_routing () =
+  let code = "
+let vitals = [98.6, 99.1, 101.4, 98.4, 102.2, 99.8, 100.5, 98.9];
+let labels = [0.0, 1.0, 1.0, 0.0];
+let detector = vitals -> learn(target: labels);
+let test_batch = [98.2, 98.5, 99.0, 98.4];
+let alert = test_batch -> detector;
+" in
+  let lexbuf = Lexing.from_string code in
+  let prog = Parser.program_file Lexer.read lexbuf in
+  let results = Eval.eval_program prog in
+  assert (List.length results = 5);
+  let detector_str = List.nth results 2 in
+  assert (contains_substr detector_str "model NeuClassifier");
+  print_endline "[PASS] test_learn_cover_routing"
+
+let test_learn_model_call () =
+  let code = "
+let x = [2.0, 4.0, 6.0];
+let y = [4.0, 8.0, 12.0];
+let doubler = x -> learn(target: y);
+let out = doubler([10.0, 20.0]);
+" in
+  let lexbuf = Lexing.from_string code in
+  let prog = Parser.program_file Lexer.read lexbuf in
+  let results = Eval.eval_program prog in
+  let out_res = List.nth results 3 in
+  assert (List.mem out_res ["[20.00, 40.00]"; "let out = [20.00, 40.00]"]);
+  print_endline "[PASS] test_learn_model_call"
+
 let () =
   print_endline "=== Running Neu Test Suite ===";
   test_scalar_math ();
@@ -100,4 +171,8 @@ let () =
   test_structural_split ();
   test_structural_cast ();
   test_contract_generation ();
+  test_learn_syntax ();
+  test_learn_tier2_routing ();
+  test_learn_cover_routing ();
+  test_learn_model_call ();
   print_endline "All tests passed successfully!"

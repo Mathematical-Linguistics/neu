@@ -1,0 +1,393 @@
+\documentclass[11pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{microtype}
+\usepackage{titlesec}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows.meta,positioning,calc,decorations.pathmorphing,shadows}
+\usepackage{hyperref}
+
+% --- Color Palette ---
+\definecolor{deepink}{HTML}{1A1A2E}
+\definecolor{accent}{HTML}{2563EB}
+\definecolor{purpleaccent}{HTML}{7C3AED}
+\definecolor{codebg}{HTML}{F8F9FA}
+\definecolor{codeframe}{HTML}{E2E8F0}
+\definecolor{keywordcolor}{HTML}{0891B2}
+\definecolor{stringcolor}{HTML}{059669}
+\definecolor{commentcolor}{HTML}{64748B}
+\definecolor{warmbg}{HTML}{FCFAF7}
+\definecolor{calloutbg}{HTML}{F2F8FF}
+\definecolor{boxborder}{HTML}{D2DCE6}
+
+% --- Callout Box ---
+\newcommand{\calloutbox}[2]{%
+\vspace{0.4em}\noindent
+\begin{tikzpicture}
+\node[draw=accent, fill=calloutbg, rounded corners=4pt, line width=0.9pt, text width=\dimexpr\linewidth-20pt\relax, inner sep=7pt] {
+    {\sffamily\bfseries\color{accent}#1}\par\vspace{0.3em}{\color{boxborder}\hrule height 0.5pt}\vspace{0.4em}
+    {\small\color{deepink}#2}
+};
+\end{tikzpicture}\vspace{0.4em}
+}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=accent,
+    citecolor=purpleaccent,
+    urlcolor=accent
+}
+
+% --- Code Listing Setup ---
+\lstset{
+    backgroundcolor=\color{codebg},
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    captionpos=b,
+    commentstyle=\color{commentcolor}\itshape,
+    frame=single,
+    framerule=0.5pt,
+    rulecolor=\color{codeframe},
+    keywordstyle=\color{keywordcolor}\bfseries,
+    stringstyle=\color{stringcolor},
+    showstringspaces=false,
+    tabsize=2
+}
+
+\lstdefinelanguage{neu}{
+  keywords={fn, let, in, if, then, else, true, false, type, contract, rule, learn, split, scatter, decompose, cover, shift, cast, synthesis, analysis, transformation},
+  keywordstyle=\color{purpleaccent}\bfseries,
+  commentstyle=\color{commentcolor}\itshape,
+  stringstyle=\color{stringcolor},
+  morecomment=[l]{//},
+  morestring=[b]",
+  literate={->}{{$\to$}}2 {<-}{{$\leftarrow$}}2
+}
+
+\titleformat{\section}{\large\bfseries\color{deepink}}{\thesection}{1em}{}
+\titleformat{\subsection}{\normalsize\bfseries\color{deepink}}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}{\small\bfseries\color{deepink}}{\thesubsubsection}{1em}{}
+
+\newtheorem{definition}{Definition}
+\newtheorem{theorem}{Theorem}
+
+\title{\textbf{Topological Machine Learning in Neu: Deriving Neural Architectures from First-Class Engine Morphisms and Representation Routing}}
+\author{\textbf{Mathematical Linguistics Group (mlG)}}
+\date{September 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We formulate the architectural design, formal semantics, and categorical foundations for incorporating statistical learning into \textbf{Neu}, an information-theoretic engine programming language. Existing deep learning frameworks (e.g., PyTorch, JAX) model computation as rigid computational graphs of multidimensional tensor arrays, delegating topological intuition and architectural composition entirely to manual human trial-and-error. We propose elevating \texttt{learn} to a first-class \textbf{topological engine verb} within Neu. We show that modern deep learning primitives---convolutions, linear attention, residual connections, multi-head projections, positional encodings, and normalization layers---decompose cleanly into Neu's six core topological primitives: \texttt{cover}, \texttt{decompose}, \texttt{split}, \texttt{cast}, \texttt{shift}, and \texttt{scatter}. Furthermore, we formalize the \textbf{Representation Routing Problem}: learning is not merely continuous parameter descent over fixed graphs, but an $A^*$-like morphic pathfinding problem over the category of representation manifolds. We clarify arrow directionality in Neu ($A \to B$ forward morphisms vs. $A^* \leftarrow B^*$ backward adjoint pullbacks), derive information-theoretic entropy bounds under Neu's \texttt{aie} triad, and provide complete language specifications and compiler AST extensions.
+\end{abstract}
+
+\section{Introduction: The Crisis of Imperative Deep Learning}
+
+In contemporary artificial intelligence engineering, frameworks such as PyTorch and TensorFlow have achieved ubiquity by providing imperative tensor manipulation coupled with reverse-mode automatic differentiation. However, from a programming language perspective, these frameworks suffer from an acute conceptual limitation:
+\begin{enumerate}
+    \item \textbf{Topological Blindness:} Neural layers are expressed as ad-hoc matrix multiplications ($\mathbf{W}\mathbf{x} + \mathbf{b}$) and memory buffers. The underlying mathematical operations---local open coverings, fiber bundle projections, orthogonal decompositions, and manifold embeddings---are submerged beneath imperative tensor arithmetic.
+    \item \textbf{Decoupling of Architecture from Optimization:} The programmer manually hardcodes a static computational graph. Optimization is restricted strictly to continuous parameter descent $\theta \in \mathbb{R}^p$ via gradient backpropagation ($\nabla_\theta \mathcal{L}$). The higher-order question---how representations ought to be routed and transformed across intermediate metric spaces---is outsourced to costly manual hyperparameter search.
+    \item \textbf{Absence of Physical and Entropic Constraints:} Standard tensor programs offer no formal guarantees regarding Shannon entropy conservation, thermodynamic efficiency, or stability under domain shifts.
+\end{enumerate}
+
+Neu was conceived to address this challenge by treating computation as continuous morphisms between \textbf{computational engines}. In this paper, we explore how Neu can natively abstract machine learning through a first-class topological verb: \texttt{learn}.
+
+\section{Syntax, Morphisms, and Arrow Directionality}
+
+A foundational question in the syntax of Neu concerns the directionality of data flow and variable assignment.
+
+\subsection{Current Flow Direction in Neu: Forward Morphisms (\texorpdfstring{$\to$}{->})}
+In Neu's existing language specification, computation flows strictly from source to target via the morphism arrow (\texttt{->}):
+\begin{lstlisting}[language=neu]
+let wave = [10, 20, 30, 40, 50];
+
+// Forward morphism flow
+let delayed = wave -> shift(2);
+let windows = wave -> cover(3, 1);
+let bands   = wave -> split { high_pass, low_pass };
+let packet  = wave -> cast(BioTelemetry);
+\end{lstlisting}
+This convention directly mirrors categorical composition in the category $\mathbf{Manifold}$:
+$$f: X \to Y, \qquad x \mapsto f(x)$$
+Data enters an engine on the left, undergoes a topological transformation, and emerges on the right.
+
+\subsection{Arrow Dualization: Forward Flow (\texorpdfstring{$\to$}{->}) vs. Backward Gradient Adjoints (\texorpdfstring{$\leftarrow$}{<-})}
+In statistical learning and scientific computing, two competing notations frequently arise:
+\begin{itemize}
+    \item \textbf{R-Style Ingestion Assignment ($\leftarrow$):} In R, \texttt{data <- source} denotes assignment, reversing the visual flow of causality.
+    \item \textbf{Adjoint / Pullback Dual Morphisms ($f^*$):} In reverse-mode automatic differentiation, forward evaluation propagates activations forward ($x_{l} \to x_{l+1}$), while gradient cotangent vectors propagate backward ($\nabla x_{l} \leftarrow \nabla x_{l+1}$).
+\end{itemize}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    x=1cm, y=1cm,
+    box/.style={rectangle, rounded corners=6pt, line width=1.1pt, minimum width=3.4cm, minimum height=1.35cm, align=center, font=\sffamily, inner sep=4.5pt},
+    primalbox/.style={box, fill=calloutbg, draw=accent},
+    targetbox/.style={box, fill=warmbg, draw=purpleaccent},
+    fwdarrow/.style={->, line width=1.5pt, color=accent, >=stealth, shorten >=4pt, shorten <=4pt},
+    bwdarrow/.style={<-, line width=1.5pt, color=purpleaccent, >=stealth, shorten >=4pt, shorten <=4pt},
+    vertarrow/.style={<->, dashed, line width=1pt, color=gray!60, >=stealth, shorten >=3pt, shorten <=3pt}
+]
+    % --- TOP ROW: PRIMAL FORWARD MANIFOLDS ---
+    \node[primalbox] (X) at (-5.5, 2.3) {
+        {\color{accent}\bfseries Primal Manifold $\mathcal{X}$}\\[2pt]
+        {\small\color{deepink} Input $\mathbf{x} \in \mathbb{R}^{d_\mathcal{X}}$}
+    };
+    
+    \node[targetbox] (Y) at (5.5, 2.3) {
+        {\color{purpleaccent}\bfseries Target Manifold $\mathcal{Y}$}\\[2pt]
+        {\small\color{deepink} Prediction $\hat{\mathbf{y}} = f_\theta(\mathbf{x}) \in \mathbb{R}^{d_\mathcal{Y}}$}
+    };
+    
+    % Forward Arrow with generous clearance
+    \draw[fwdarrow] (X.east) -- (Y.west)
+        node[midway, above=4pt, font=\small\bfseries, color=accent] {Forward Morphism: $\mathbf{x} \xrightarrow{\,f_\theta\,} \hat{\mathbf{y}}$}
+        node[midway, below=4pt, font=\scriptsize\sffamily, color=gray!80] {Pipeline Operator (\texttt{->})};
+
+    % --- BOTTOM ROW: COTANGENT ADJOINT BUNDLES ---
+    \node[primalbox] (TX) at (-5.5, -2.3) {
+        {\color{accent}\bfseries Cotangent Space $T^*_{\mathbf{x}}\mathcal{X}$}\\[2pt]
+        {\small\color{deepink} Pulled Gradient $\nabla_{\mathbf{x}}\mathcal{L} \in \mathbb{R}^{d_\mathcal{X}}$}
+    };
+    
+    \node[targetbox] (TY) at (5.5, -2.3) {
+        {\color{purpleaccent}\bfseries Cotangent Space $T^*_{\hat{\mathbf{y}}}\mathcal{Y}$}\\[2pt]
+        {\small\color{deepink} Loss 1-Form $\mathbf{d}\mathcal{L} \in \mathbb{R}^{d_\mathcal{Y}}$}
+    };
+    
+    % Backward Arrow with generous clearance and no overflow
+    \draw[bwdarrow] (TX.east) -- (TY.west)
+        node[midway, xshift=-6pt, above=4pt, font=\small\bfseries, color=purpleaccent] {Adjoint Pullback: $\nabla_{\mathbf{x}}\mathcal{L} \xleftarrow{\,f_\theta^*\,} \mathbf{d}\mathcal{L}$}
+        node[midway, below=4pt, font=\scriptsize\sffamily, color=gray!80] {Reverse Gradient Contract (\texttt{<-})};
+
+    % --- VERTICAL BUNDLE PROJECTIONS ---
+    \draw[vertarrow] (X.south) -- (TX.north)
+        node[midway, left=5pt, font=\scriptsize\sffamily, color=gray!80, align=right] {Cotangent\\Bundle $\pi_\mathcal{X}$};
+        
+    \draw[vertarrow] (Y.south) -- (TY.north)
+        node[midway, right=5pt, font=\scriptsize\sffamily, color=gray!80, align=left] {Cotangent\\Bundle $\pi_\mathcal{Y}$};
+    
+    % --- CENTER ENGINE KERNEL BADGE ---
+    \node[draw=boxborder, fill=white, rounded corners=6pt, line width=1pt, inner sep=7pt, align=center, font=\sffamily, drop shadow={opacity=0.08, shadow xshift=1pt, shadow yshift=-1pt}] at (0, 0) {
+        {\color{deepink}\bfseries\small Engine Kernel $E_\theta$}\\[3pt]
+        {\scriptsize\color{gray!80} Parameter State: $\theta \in \Theta$}\\[2pt]
+        {\scriptsize\color{accent}\bfseries Adjoint Update: $\nabla_\theta \mathcal{L} \leftarrow \mathbf{x} \otimes \mathbf{d}\mathcal{L}$}
+    };
+\end{tikzpicture}
+\vspace{0.3em}
+\caption{The Categorical Duality of Learning in Neu: Forward Morphism Flow ($\to$) across primal manifolds $\mathcal{X} \to \mathcal{Y}$, and Reverse Adjoint Pullback ($\leftarrow$) across cotangent bundles $T^*\mathcal{Y} \to T^*\mathcal{X}$. The forward operator (\texttt{->}) models computational causality, while the reverse operator (\texttt{<-}) models gradient co-vector propagation.}
+\label{fig:arrow_duality}
+\end{figure}
+
+\calloutbox{Syntax Decision for Neu}{
+In Neu, the primary pipeline operator remains \textbf{strictly forward} (\texttt{->}):
+\begin{center}
+\texttt{data -> learn(objective) -> model}
+\end{center}
+The reverse arrow (\texttt{<-}) is reserved for \textbf{adjoint backpropagation tracking} and bidirectional structural contracts, preserving total consistency across the language's grammar.
+}
+
+\section{Deconstructing PyTorch into Neu's Topological Verbs}
+
+The core thesis of this paper is that every canonical layer and architecture in deep learning is a composite of Neu's existing topological verbs:
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\linewidth}{llX}
+\toprule
+\textbf{Deep Learning Primitive} & \textbf{Neu Topological Verb} & \textbf{Mathematical Operation in Neu} \\
+\midrule
+Convolution / Stride & \texttt{cover(window, step)} & Partitions continuous input into overlapping open covering sets $\mathcal{U} = \{U_i\}$. \\
+Linear Layer / SVD / LoRA & \texttt{decompose(basis)} & Projects features onto an orthogonal or learned coordinate frame: $\mathbf{z} = \mathbf{W}\mathbf{x}$. \\
+Activation Function / Norm & \texttt{cast(Manifold)} & Functorial re-interpretation embedding vectors into non-linear or bounded metric spaces. \\
+Residual Skip Connection & \texttt{split \{ F, identity \}} & Branches stream into concurrent engine pathways and recombines via co-product $+$. \\
+Positional Encoding (RoPE) & \texttt{shift(phase / delay)} & Applies spatial, temporal, or phase rotations to preserve ordering topology. \\
+Multi-Head Attention & \texttt{split} $\to$ \texttt{decompose} & Concurrently splits input into Query, Key, Value bases before pairwise scalar product. \\
+Distributed Data-Parallel & \texttt{scatter(lanes)} & Distributes tensor batches across spatial processing lanes and hardware cores. \\
+\bottomrule
+\end{tabularx}
+\caption{The Dictionary of Equivalence: Mapping PyTorch Primitives to Neu Topological Verbs.}
+\label{tab:torch_to_neu}
+\end{table}
+
+\subsection{Expressing a Transformer Block in Pure Neu}
+Under this topological formulation, a multi-head self-attention transformer block is expressed not through nested tensor allocations, but through transparent topological routing:
+
+\begin{lstlisting}[language=neu]
+// A complete Self-Attention Layer in Neu
+fn attention_block(seq) = 
+  seq 
+    -> split { 
+         q_proj: decompose(Q_basis), 
+         k_proj: decompose(K_basis), 
+         v_proj: decompose(V_basis) 
+       }
+    -> shift(causal_mask)
+    -> cast(SoftmaxDist)
+    -> split { feedforward_network, identity }
+    -> cast(LayerNorm);
+\end{lstlisting}
+
+Notice the immense conceptual clarity: there are no hidden buffer shapes, no mysterious stride calculations, and no implicit tensor broadcasting bugs. The structural topology of the learning process is statically visible to both the compiler and the programmer.
+
+\section{The \texttt{learn} Topological Verb: Dual-Tier Architecture}
+
+How should the verb \texttt{learn} be formalized in Neu? As recognized in our design discussions, calling \texttt{learn(data)} cannot guarantee instantaneous or successful convergence. Learning is fundamentally non-deterministic and computationally hard.
+
+We propose that \texttt{learn} operates across two distinct tiers:
+\begin{enumerate}
+    \item \textbf{Tier 1 (Continuous Parameter Descent):} Differentiating continuous weights $\theta$ along a fixed topological sequence of engines.
+    \item \textbf{Tier 2 (The Representation Routing Problem):} Searching over the combinatorial graph of topological compositions to find the optimal morphism path from source data to target signifiers.
+\end{enumerate}
+
+\subsection{Tier 1: Continuous Parameter Adaptation}
+In the simplest case where the user specifies a structural pipeline, \texttt{learn} acts as an optimizing compiler:
+\begin{lstlisting}[language=neu]
+// Concrete parameter learning over specified topology
+let trained_filter = 
+  audio_stream 
+    -> learn(
+         loss: mse, 
+         budget: epochs(50), 
+         topology: cover(512, 128) -> decompose(mel_basis) -> cast(LatentVoice)
+       );
+\end{lstlisting}
+Here, the compiler synthesizes the adjoint pullback graphs and runs automatic differentiation, emitting optimized SIMD or P4 silicon match-action rules.
+
+\subsection{Tier 2: The Representation Routing Problem (\texorpdfstring{$A^*$}{A*} in Morphism Space)}
+
+In the general case, the user provides raw data and an objective, but the optimal sequence of intermediate representations is unknown:
+\begin{lstlisting}[language=neu]
+let classifier = telemetry_stream -> learn(target: arrhythmia_label, max_entropy: 1.2);
+\end{lstlisting}
+
+What must the Neu runtime execute? It must solve the \textbf{Representation Routing Problem}:
+
+\begin{definition}[The Representation Routing Problem]
+Let $\mathcal{C}_{\mathbf{Neu}}$ be the category whose objects are data manifolds $\mathcal{M}_i$ and whose morphisms are compositions of Neu topological verbs $\mathcal{V} = \{\texttt{cover}, \texttt{decompose}, \texttt{split}, \texttt{cast}, \texttt{shift}, \texttt{scatter}\}$. Given source manifold $\mathcal{X}$ and target manifold $\mathcal{Y}$, find a morphism path $\pi^* = v_k \circ \dots \circ v_1$ that minimizes:
+$$\pi^* = \arg\min_{\pi \in \operatorname{Path}(\mathcal{X}, \mathcal{Y})} \Big( \mathcal{L}(\pi(\mathcal{X}), \mathcal{Y}) + \alpha \, K(\pi) + \beta \, \mathcal{W}_{\text{diss}}(\pi) \Big)$$
+where $\mathcal{L}$ is empirical task loss, $K(\pi)$ is the Kolmogorov structural complexity of the pipeline, and $\mathcal{W}_{\text{diss}}$ is the physical Landauer thermodynamic dissipation of the engine execution.
+\end{definition}
+
+This is formally equivalent to heuristic pathfinding (e.g., $A^*$ search) over a directed hypergraph of representation spaces:
+\begin{itemize}
+    \item \textbf{Start Node:} Raw sensor data $(\mathbb{R}^N, \text{time-domain})$.
+    \item \textbf{Edges:} Available topological transitions (\texttt{cover} windows into frequency domain; \texttt{decompose} into principal components; \texttt{cast} into Riemannian manifold).
+    \item \textbf{Heuristic Function $h(n)$:} Information-theoretic bottleneck distance $I(X; Z) - I(Z; Y)$ measuring how close the intermediate representation $Z$ is to sufficiency for target $Y$.
+\end{itemize}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    scale=0.92,
+    every node/.style={font=\small\sffamily, align=center},
+    rnode/.style={draw=#1, fill=warmbg, rounded corners=6pt, line width=1.1pt, inner sep=4.5pt, align=center},
+    basenode/.style={draw=#1, fill=calloutbg, rounded corners=6pt, line width=1.2pt, inner sep=5.5pt, align=center}
+]
+    % Start Node
+    \node[basenode=accent] (S) at (-6.2, 0) {
+        {\bfseries Raw Stream $\mathcal{X}$}\\[2pt]
+        {\scriptsize\color{gray!80} Time Domain}
+    };
+    
+    % Intermediate Morphisms
+    \node[rnode=purpleaccent] (C) at (-2.3, 1.8) {
+        {\bfseries\color{purpleaccent}\texttt{cover}$(w, s)$}\\[2pt]
+        {\scriptsize Open Patches $\mathcal{U}_i$}
+    };
+    
+    \node[rnode=purpleaccent] (D) at (-2.3, -1.8) {
+        {\bfseries\color{purpleaccent}\texttt{decompose}}\\[2pt]
+        {\scriptsize Spectral Basis $\Phi$}
+    };
+    
+    \node[rnode=keywordcolor] (L) at (0.0, 0) {
+        {\bfseries\color{keywordcolor}\texttt{cast}}\\[2pt]
+        {\scriptsize Latent Manifold $\mathcal{Z}$}
+    };
+    
+    % Target Node with ample gap from L
+    \node[basenode=stringcolor] (T) at (7.4, 0) {
+        {\bfseries\color{stringcolor} Target Signifier $\mathcal{Y}$}\\[2pt]
+        {\scriptsize Task Space}
+    };
+    
+    % Routing Transitions with clean pathing
+    \draw[->, line width=1.2pt, color=accent, shorten >=3pt, shorten <=3pt] (S) to[bend left=18] node[midway, above left, font=\scriptsize, color=accent] {$\operatorname{Cost} = 1.2$} (C);
+    \draw[->, line width=1.2pt, color=accent, shorten >=3pt, shorten <=3pt] (S) to[bend right=18] node[midway, below left, font=\scriptsize, color=accent] {$\operatorname{Cost} = 2.4$} (D);
+    
+    \draw[->, line width=1.2pt, color=purpleaccent, shorten >=3pt, shorten <=3pt] (C) to[bend left=18] node[midway, above right, font=\scriptsize, color=purpleaccent] {$\operatorname{Cost} = 0.8$} (L);
+    \draw[->, line width=1.2pt, color=purpleaccent, shorten >=3pt, shorten <=3pt] (D) to[bend right=18] node[midway, below right, font=\scriptsize, color=purpleaccent] {$\operatorname{Cost} = 1.5$} (L);
+    
+    % Optimal morphism path with wide clearance between L and T
+    \draw[->, line width=1.8pt, color=stringcolor, >=stealth, shorten >=4pt, shorten <=4pt] (L.east) -- (T.west)
+        node[midway, above=5pt, font=\small\bfseries, color=stringcolor] {Optimal Path $\pi^*$}
+        node[midway, below=5pt, font=\scriptsize\sffamily, color=gray!70] {$\min \operatorname{Cost} = 2.0$};
+\end{tikzpicture}
+\vspace{0.4em}
+\caption{The Representation Routing Problem: Navigating the Hypergraph of Topological Verbs via Heuristic Morphic Search ($A^*$-style pathfinding over morphism spaces).}
+\label{fig:representation_routing}
+\end{figure}
+
+\subsection{Epistemic Realism: Why \texttt{learn} May Fail}
+Crucially, declaring \texttt{learn} does not mean the system will immediately or magically converge. Neu's formal type system makes failures observable and verifiable:
+\begin{itemize}
+    \item \textbf{Topological Obstruction:} If target manifold $\mathcal{Y}$ has non-trivial Euler characteristic $\chi(\mathcal{Y}) \ne \chi(\mathcal{X})$ and the morphism pipeline lacks a topology-altering verb (\texttt{cover} or \texttt{cast}), the compiler warns of a \textbf{homeomorphism mismatch}.
+    \item \textbf{Information Bottleneck Violation:} If intermediate representation $Z$ has entropy $H(Z) < H(Y)$, exact learning is physically impossible by the Data Processing Inequality.
+    \item \textbf{Barren Plateaus / Vanishing Gradients:} The condition number $\kappa(\mathbf{W})$ of intermediate decompositions serves as a static indicator of optimizability.
+\end{itemize}
+
+\section{Integration with Neu's Engine Triad (\texttt{aie})}
+
+In Neu, all computational steps are statically typed under the Engine Triad:
+\begin{equation}
+\text{Engine Type} \in \left\{
+\begin{aligned}
+&\textbf{Synthesis} &&(H_{\text{out}} > H_{\text{in}}), \\
+&\textbf{Analysis} &&(H_{\text{out}} < H_{\text{in}}), \\
+&\textbf{Transformation} &&(H_{\text{out}} = H_{\text{in}})
+\end{aligned}
+\right\}
+\end{equation}
+
+How does \texttt{learn} interact with this triad?
+\begin{enumerate}
+    \item \textbf{The Learning Act is an Analysis Engine:}
+    $$\text{\texttt{learn}}: \mathcal{D}_{\text{train}} \mapsto \theta^*, \qquad H(\theta^*) \ll H(\mathcal{D}_{\text{train}})$$
+    Training is massive information compression. Thousands of megabytes of raw data are compressed into a compact coordinate vector of parameters $\theta^*$.
+    \item \textbf{The Trained Product May Be Any Engine Type:}
+    \begin{itemize}
+        \item \textbf{Trained Classifier:} An \textbf{Analysis Engine} that compresses inputs into discrete categorical signifiers.
+        \item \textbf{Trained Diffusion / Generative Model:} A \textbf{Synthesis Engine} that takes low-entropy noise $z \sim \mathcal{N}(0, I)$ and expands it into rich high-dimensional synthetic signals.
+        \item \textbf{Trained Normalizing Flow / Autoencoder:} A \textbf{Transformation Engine} that maps representations bijectively and isometrically across latent spaces.
+    \end{itemize}
+\end{enumerate}
+
+\section{Conclusion and Engineering Roadmap}
+
+We have established the theoretical foundations and syntactic blueprint for \texttt{learn} in Neu:
+\begin{itemize}
+    \item \textbf{Arrow Consistency:} Retaining forward flow \texttt{->} for morphisms while establishing \texttt{<-} for adjoint cotangent pullbacks.
+    \item \textbf{PyTorch Deconstruction:} Deep neural networks are not arbitrary matrix multiplications, but structured compositions of \texttt{cover}, \texttt{decompose}, \texttt{split}, \texttt{shift}, \texttt{cast}, and \texttt{scatter}.
+    \item \textbf{Representation Routing:} Formulating architecture discovery as heuristic pathfinding in the category of manifolds.
+\end{itemize}
+
+In forthcoming work, we will implement the Menhir AST grammar extensions for \texttt{learn}, integrate an automatic differentiation runtime in OCaml, and benchmark Neu's compiled topological models directly against PyTorch on standard biosignal and linguistic tasks.
+
+\vspace{1.5em}
+\noindent\hrule height 0.7pt \vspace{0.5em}
+{\scriptsize\sffamily\color{commentcolor}
+\textbf{Citation:} Mathematical Linguistics Group (mlG), ``Topological Machine Learning in Neu: Deriving Neural Architectures from First-Class Engine Morphisms and Representation Routing,'' \textit{Neu Language Working Papers}, Sept 2026.
+}
+
+\end{document}
